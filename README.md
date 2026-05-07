@@ -50,21 +50,20 @@ Frontend Graph UI
 │       ├── validationRules.json
 │       └── server.js
 │
-|
 ├── frontend/
-|
+│
 ├── specs/
 │   ├── en/
-│   |   ├── data-model-en.md
-│   |   ├── overview-en.md
-│   |   ├── soap-mapping-en.md
-│   |   └── ui-spec-en.md
+│   │   ├── data-model-en.md
+│   │   ├── overview-en.md
+│   │   ├── soap-mapping-en.md
+│   │   └── ui-spec-en.md
 │   └── fr/
 │       ├── data-model-fr.md
 │       ├── overview-fr.md
 │       ├── soap-mapping-fr.md
 │       └── ui-spec-fr.md
-|
+│
 └── README.md
 ```
 

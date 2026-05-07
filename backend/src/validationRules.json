@@ -1,0 +1,35 @@
+{
+  "blocking_errors": [
+    {
+      "code": "MissingMainPrompt",
+      "description": "Menu without main prompt"
+    },
+    {
+      "code": "InvalidTarget",
+      "description": "Action to an invalid menu or extension"
+    },
+    {
+      "code": "DuplicateEntryPoint",
+      "description": "Multiple menu for the same entry"
+    },
+    {
+      "code": "InvalidDTMF",
+      "description": "Invalid DTMF input"
+    },
+    {
+      "code": "EmptyAction",
+      "description": "DTMF action with no output"
+    }
+  ],
+
+  "warnings": [
+    {
+      "code": "UnreachableMenu",
+      "description": "Unaccessible menu from the entry point"
+    },
+    {
+      "code": "NoDefaultAction",
+      "description": "Undefined fallback"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "company": {
+    "companyId": "company.company_id",
+    "companyName": "company.name"
+  },
+
+  "entry_point": {
+    "pilotNumber": "entry_point.pilot_number",
+    "mainMenuId": "entry_point.start_node_id"
+  },
+
+  "nodes": {
+    "nodeId": "nodes[].id",
+    "nodeType": "nodes[].type",
+    "nodeName": "nodes[].label",
+    "promptFile": "nodes[].prompt",
+    "timeout": "nodes[].settings.timeout",
+    "retries": "nodes[].settings.retries"
+  },
+
+  "targets": {
+    "targetId": "targets[].id",
+    "targetNumber": "targets[].number",
+    "targetType": "targets[].type",
+    "targetLabel": "targets[].label"
+  }
+}

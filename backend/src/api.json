@@ -1,0 +1,36 @@
+{
+  "endpoint": "GET /api/call-flows/{company_id}/{pilot_number}",
+  "response": {
+    "company": {
+      "company_id": "string",
+      "name": "string"
+    },
+    "entry_point": {
+      "pilot_number": "string",
+      "start_node_id": "string"
+    },
+    "nodes": [
+      {
+        "id": "string",
+        "type": "menu | transfer | playback",
+        "label": "string",
+        "prompt": "string | null",
+        "dtmf": {
+          "1": "node_or_target_id"
+        },
+        "settings": {
+          "timeout": "number",
+          "retries": "number"
+        }
+      }
+    ],
+    "targets": [
+      {
+        "id": "string",
+        "type": "extension | voicemail | external_number | hangup",
+        "label": "string",
+        "number": "string"
+      }
+    ]
+  }
+}

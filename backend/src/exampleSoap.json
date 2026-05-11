@@ -1,0 +1,46 @@
+{
+  "companyId": "1001",
+  "companyName": "Example Company",
+
+  "pilotNumber": "0123456789",
+  "mainMenuId": "menu_1",
+
+  "menus": [
+    {
+      "nodeId": "menu_1",
+      "nodeType": "Interactive menu",
+      "nodeName": "Main Menu",
+
+      "promptFile": "welcome.wav",
+
+      "timeout": 5,
+      "retries": 3,
+
+      "actions": [
+        {
+          "dtmf": "1",
+          "targetId": "target_sales"
+        },
+        {
+          "dtmf": "2",
+          "targetId": "target_support"
+        }
+      ]
+    }
+  ],
+
+  "targets": [
+    {
+      "targetId": "target_sales",
+      "targetType": "Extension",
+      "targetLabel": "Sales",
+      "targetNumber": "1001"
+    },
+    {
+      "targetId": "target_support",
+      "targetType": "Extension",
+      "targetLabel": "Support",
+      "targetNumber": "1002"
+    }
+  ]
+}

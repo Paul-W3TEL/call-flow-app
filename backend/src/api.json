@@ -1,19 +1,103 @@
 {
-  "endpoint": "GET /api/call-flows/{company_id}/{pilot_number}",
-  "response": {
-    "company": {
-      "company_id": "string",
-      "name": "string"
+  "name": "Call Flow Internal API",
+  "version": "0.1.0",
+  "description": "Internal JSON API used by the Call Flow Editor frontend. This API abstracts EZVMS SOAP/XML complexity.",
+
+  "base_path": "/api",
+
+  "endpoints": [
+    {
+      "name": "Health check",
+      "method": "GET",
+      "path": "/health",
+      "description": "Checks if the backend API is reachable.",
+      "response": {
+        "status": "ok"
+      }
     },
-    "entry_point": {
-      "pilot_number": "string",
-      "start_node_id": "string"
+    {
+      "name": "Get API contract",
+      "method": "GET",
+      "path": "/contract",
+      "description": "Returns this API contract.",
+      "response": "api.json"
     },
-    "nodes": [
-      {
-        "id": "string",
-        "type": "menu | transfer | playback",
-        "label": "string",
+    {
+      "name": "Get Call Flow",
+      "method": "GET",
+      "path": "/call-flows/{company_id}/{pilot_number}",
+      "description": "Fetches a Call Flow and returns the internal JSON model.",
+      "path_parameters": {
+        "company_id": "string",
+        "pilot_number": "string"
+      },
+      "response": {
+        "company": {
+          "company_id": "string",
+          "name": "string"
+        },
+        "entry_point": {
+          "pilot_number": "string",
+          "start_node_id": "string"
+        },
+        "nodes": [
+          {
+            "id": "string",
+            "type": "menu | transfer | playback",
+            "label": "string",
+            "prompt": "string | null",
+            "dtmf": {
+              "1": "node_or_target_id"
+            },
+            "settings": {
+              "timeout": "number",
+              "retries": "number"
+            }
+          }
+        ],
+        "targets": [
+          {
+            "id": "string",
+            "type": "extension | voicemail | external_number | hangup",
+            "label": "string",
+            "number": "string"
+          }
+        ],
+        "validation": {
+          "status": "valid | invalid | warning",
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "name": "Validate Call Flow",
+      "method": "POST",
+      "path": "/call-flows/validate",
+      "description": "Validates a Call Flow JSON object without applying changes to EZVMS.",
+      "request_body": {
+        "company": {},
+        "entry_point": {},
+        "nodes": [],
+        "targets": []
+      },
+      "response": {
+        "status": "valid | invalid | warning",
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "name": "Update Node Draft",
+      "method": "PATCH",
+      "path": "/call-flows/{company_id}/{pilot_number}/nodes/{node_id}",
+      "description": "Updates editable fields of a node in draft state only.",
+      "path_parameters": {
+        "company_id": "string",
+        "pilot_number": "string",
+        "node_id": "string"
+      },
+      "request_body": {
         "prompt": "string | null",
         "dtmf": {
           "1": "node_or_target_id"
@@ -22,15 +106,62 @@
           "timeout": "number",
           "retries": "number"
         }
+      },
+      "editable_fields": [
+        "prompt",
+        "dtmf",
+        "settings.timeout",
+        "settings.retries"
+      ],
+      "response": {
+        "status": "draft_saved",
+        "call_flow": {}
       }
-    ],
-    "targets": [
-      {
-        "id": "string",
-        "type": "extension | voicemail | external_number | hangup",
-        "label": "string",
-        "number": "string"
+    },
+    {
+      "name": "Apply Call Flow to EZVMS",
+      "method": "POST",
+      "path": "/call-flows/{company_id}/{pilot_number}/apply",
+      "description": "Applies validated changes to EZVMS through SOAP calls. Must require frontend confirmation before use.",
+      "path_parameters": {
+        "company_id": "string",
+        "pilot_number": "string"
+      },
+      "request_body": {
+        "confirmed": true
+      },
+      "response": {
+        "status": "applied",
+        "message": "Changes were applied to EZVMS."
       }
-    ]
-  }
+    }
+  ],
+
+  "errors": [
+    {
+      "code": "CALL_FLOW_NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested Call Flow was not found."
+    },
+    {
+      "code": "INVALID_CALL_FLOW",
+      "http_status": 400,
+      "message": "The Call Flow contains blocking validation errors."
+    },
+    {
+      "code": "NODE_NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested node was not found."
+    },
+    {
+      "code": "READ_ONLY_FIELD",
+      "http_status": 400,
+      "message": "The request tried to modify a read-only field."
+    },
+    {
+      "code": "SOAP_SYNC_ERROR",
+      "http_status": 502,
+      "message": "An error occurred while communicating with EZVMS."
+    }
+  ]
 }

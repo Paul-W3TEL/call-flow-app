@@ -1,0 +1,7 @@
+{
+  "prompt": "user",
+  "dtmf": "user",
+  "id": "read-only",
+  "type": "read-only",
+  "internal_flags": "hidden"
+}

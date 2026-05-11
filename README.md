@@ -45,8 +45,9 @@ Frontend Graph UI
 │   └── src/
 │       ├── api.json
 │       ├── exampleData.json
-│       ├── soapExample.json
+│       ├── exampleSoap.json
 │       ├── soapMapping.json
+│       ├── uiExposureRules.json
 │       ├── validationRules.json
 │       └── server.js
 │
@@ -96,22 +97,10 @@ The backend is responsible for:
 
 ### Current Backend State
 
-Currently implemented:
-
-- internal API contract
-- mock Call Flow data
-- SOAP mapping model
-- validation rules
-- architecture structure
-
-Planned later:
-
-- real SOAP integration
-- XML parsing
-- authentication
-- persistence
-- REST endpoints
-- synchronization workflow
+- JSON definition of endpoints, methods, and error codes
+- Functional Express server for health checks
+- Initial structures for companies, entry points, nodes, and targets
+- Mapping definitions for SOAP-to-JSON conversion, UI exposure permissions, and validation rules
 
 ---
 

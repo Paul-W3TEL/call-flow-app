@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import mockData from "./mockData.json" assert { type: "json" };
+import exampleData from "./exampleData.json" assert { type: "json" };
 import apiContract from "./api.json" assert { type: "json" };
 
 const app = express();
@@ -21,15 +21,15 @@ app.get("/api/call-flows/:companyId/:pilotNumber", (req, res) => {
   const { companyId, pilotNumber } = req.params;
 
   if (
-    mockData.company.company_id !== companyId ||
-    mockData.entry_point.pilot_number !== pilotNumber
+    exampleData.company.company_id !== companyId ||
+    exampleData.entry_point.pilot_number !== pilotNumber
   ) {
     return res.status(404).json({
       error: "CALL_FLOW_NOT_FOUND"
     });
   }
 
-  res.json(mockData);
+  res.json(exampleData);
 });
 
 app.listen(port, () => {

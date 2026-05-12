@@ -52,6 +52,9 @@ Frontend Graph UI
 │       └── server.js
 │
 ├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
 │
 ├── specs/
 │   ├── en/
@@ -106,7 +109,7 @@ The backend is responsible for:
 
 ## Frontend
 
-The frontend will provide:
+The frontend provides a modern, interactive interface built with the Diamy UI design language
 
 - graph visualisation
 - node interaction
@@ -115,12 +118,15 @@ The frontend will provide:
 - controlled editing features
 - Diamy UI integration
 
-Current state:
+### Current Frontend State
 
-```txt
-Frontend structure prepared
-Implementation pending
-```
+- dynamic "Graph Canvas" that renders Call Flow nodes and their DTMF transitions
+- synchronized sidebar and canvas that highlight nodes on hover and selection
+- contextual panel that displays technical parameters for the selected node
+- integrated status bar and chips indicating the current validity and synchronization state
+- currently uses a local representation of the internal JSON model for testing visual states and UI logic.
+
+The frontend will provide:
 
 ---
 
@@ -155,14 +161,12 @@ This model acts as the canonical application structure.
 
 ## Planned Features
 
-- Graph visualisation
-- Prompt editing
-- DTMF action editing
-- Validation engine
+- Live API Integration
+- Controlled Editing
+- Action Management
+- Real-time Validation
 - EZVMS synchronization
-- Export features
-- Multi-language prompt support
-- Future versioning support
+- Multi-language Support
 
 ---
 
@@ -170,13 +174,9 @@ This model acts as the canonical application structure.
 
 Current work focuses on:
 
-- architecture
-- specifications
-- internal models
-- backend structure
-- SOAP mapping
-- validation rules
-- mock data
+- Frontend/Backend Connection
+- Editing Logic
+- Validation UI
 
 ---
 

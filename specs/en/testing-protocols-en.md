@@ -561,7 +561,22 @@ Expected result:
 - the node switches to a modified state
 - no error is seen as long as entered values are valid
 
-### 5.9 Valid DTMF modification
+### 5.9 Excessive modification
+
+**Goal** - Check if entering to many retries blocks validation
+
+Actions :
+
+- enter a very large number in `Retries`
+
+Expected result: 
+
+- the node displays an error indicator
+- the associated sidebar element displays an error indicator
+- the Detail Panem show a validation error
+- `Apply to EZVMS` is blocked
+
+### 5.10 Valid DTMF modification
 
 **Goal** - Check if a DTMF destination can be modified to an existing destination
 
@@ -575,7 +590,7 @@ Expected result:
 - the node switches to a modified state
 - the validation remains valid
 
-### 5.10 Invalid DTMF
+### 5.11 Invalid DTMF
 
 **Goal** - Check if an non-existant destination is detected
 
@@ -590,7 +605,7 @@ Expected result:
 - the Detail Panem show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.11 Manual validation
+### 5.12 Manual validation
 
 **Goal** - Check the `Validate` button
 
@@ -610,7 +625,7 @@ Expected result if invalid
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.12 Local data refresh
+### 5.13 Local data refresh
 
 **Goal** - Check if the `Refresh` button cancels all local modifications
 
@@ -626,7 +641,7 @@ Expected result:
 - errors disappear
 - no selection is active
 
-### 5.13 Application to EZVMS
+### 5.14 Application to EZVMS
 
 **Goal** - Check if the application asks for confirmation and blocks errors
 

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Call Flow Editor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <div class="brand">Di<span>amy</span></div>
+          <div class="subtitle">Call Flow Editor</div>
+        </div>
+
+        <div class="header-context">
+          <span class="chip chip-info">Mock API</span>
+          <span id="companyName">Example Company</span>
+          <span class="mono" id="pilotNumber">0123456789</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="di-btn di-btn-light" onclick="clearSelection()">
+            Unselect
+          </button>
+          <button class="di-btn di-btn-secondary">Refresh</button>
+          <button class="di-btn di-btn-secondary">Validate</button>
+          <button class="di-btn di-btn-primary">Apply to EZVMS</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="sidebar">
+          <div class="panel-title">Call Flow</div>
+
+          <div class="section-label">Entry point</div>
+          <div id="entryPointItem"></div>
+
+          <div class="section-label">Nodes</div>
+          <div id="nodeList"></div>
+
+          <div class="section-label">Targets</div>
+          <div id="targetList"></div>
+        </aside>
+
+        <section class="canvas-panel">
+          <div class="panel-toolbar">
+            <div>
+              <div class="panel-title">Graph Canvas</div>
+              <div class="helper">
+                Visual mock of the internal Call Flow model
+              </div>
+            </div>
+            <span class="chip chip-ok">Valid</span>
+          </div>
+
+          <div class="graph-canvas" id="graphCanvas"></div>
+        </section>
+
+        <aside class="detail-panel">
+          <div class="panel-title">Detail Panel</div>
+          <div id="detailContent" class="detail-content"></div>
+        </aside>
+      </main>
+
+      <footer class="status-bar">
+        <span class="chip chip-ok">Clean</span>
+        <span>No blocking validation error detected</span>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

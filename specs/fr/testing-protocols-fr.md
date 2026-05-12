@@ -1,20 +1,21 @@
 # Protocoles de test
 
-- **Titre du document** > Protocol de test
-- **Version** > 1.1
+- **Titre du document** > Protocoles de test
+- **Version** > 1.2
 - **Status** > Brouillon interne
 - **Auteur** > Paul Koster
-- **Date** > 11 mai 2026
+- **Date** > 12 mai 2026
 - **Confidentialité** > Document interne – W3TEL / TEQTEL
 
 ------
 
 ## Historique des versions
 
-| Version | Date        | Auteur      | Description            |
-| ------- | ----------- | ----------- | ---------------------- |
-| 1.0     | 11 mai 2026 | Paul Koster | Version initial        |
-| 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API |
+| Version | Date        | Auteur      | Description                 |
+| ------- | ----------- | ----------- | --------------------------- |
+| 1.0     | 11 mai 2026 | Paul Koster | Version initial             |
+| 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API      |
+| 1.2     | 12 mai 2026 | Paul Koster | Protocoles de test frontend |
 
 ------
 
@@ -29,7 +30,7 @@
 Ce document centralise les différents protocoles de test à respecter.
 Il sera régulièrement mis à jour selon les fonctionnalités ajouté au projet.
 
------
+------
 
 ## 2. Pré-requis
 
@@ -57,7 +58,7 @@ Depuis le serveur :
 - npm
 - curl
 
----
+------
 
 ## 3. Connexion au serveur de test
 
@@ -96,7 +97,7 @@ Actions possibles :
 - vérifier que le serveur est allumé (voir avec l'administrateur)
 - vérifier que le port SSH est ouvert (voir avec l'administrateur)
 
------
+------
 
 ## 4. Protocoles de tests API
 
@@ -399,4 +400,259 @@ Réponse attendue
 }
 ```
 
------
+------
+
+## 5. Protocoles de tests Frontend
+
+### 5.1 Ouverture du frontend d'exemple
+
+**Objectif** - Vérifier que l’interface mock s’ouvre correctement.
+
+Depuis le poste local, ouvrir :
+
+```txt
+frontend/index.html
+```
+
+Résultat attendu :
+
+- le header Diamy est visible
+- la sidebar est visible
+- le Graph Canvas est visible
+- le Detail Panel est visible
+- la barre de statut est visible
+
+Erreurs possibles :
+
+```txt
+page blanche
+styles non chargés
+script non chargé
+```
+
+Actions possibles :
+
+- vérifier que `index.html`, `styles.css` et `app.js` sont dans le même dossier
+- ouvrir la console navigateur
+- vérifier les erreurs JavaScript
+
+### 5.2 Sélection depuis la sidebar
+
+**Objectif** - Vérifier que les éléments de la sidebar sélectionnent les bons blocs.
+
+Actions :
+
+- cliquer sur le point d'entrée
+- cliquer sur chaque noeud
+- cliquer sur chaque cible
+
+Résultat attendu :
+
+- le Detail Panel affiche les informations de l’élément sélectionné
+- l’élément sélectionné dans la sidebar utilise le style sélectionné
+- le bloc correspondant dans le graph utilise le style sélectionné
+
+### 5.3 Sélection depuis le Graph Canvas
+
+**Objectif** - Vérifier que les blocs du graph sont interactifs.
+
+Actions :
+
+- cliquer sur le point d'entrée
+- cliquer sur chaque noeud
+- cliquer sur chaque cible
+
+Résultat attendu :
+
+- le curseur devient cliquable au survol
+- le Detail Panel affiche les bonnes informations
+- le bloc sélectionné est visuellement identifiable
+- l’élément correspondant dans la sidebar est aussi sélectionné
+
+### 5.4 Survol synchronisé
+
+**Objectif** - Vérifier que le survol sidebar/graph est synchronisé.
+
+Actions :
+
+- survoler un élément de la sidebar
+- observer le bloc correspondant dans le graph
+- survoler un bloc du graph
+- observer l’élément correspondant dans la sidebar
+- quitter le survol
+
+Résultat attendu :
+
+- les deux éléments liés utilisent la couleur de survol
+- la couleur de survol est différente de la couleur de sélection
+- l’état de survol disparaît quand la souris quitte l’élément
+- l’état sélectionné reste visible même après le survol
+
+### 5.5 Désélection
+
+**Objectif** - Vérifier que l’utilisateur peut revenir à un état sans sélection.
+
+Action :
+
+- cliquer sur le bouton `Unselect`
+
+Résultat attendu :
+
+- aucun élément sidebar n’est sélectionné
+- aucun bloc graph n’est sélectionné
+- le Detail Panel affiche :
+
+```txt
+Waiting for selection
+```
+
+### 5.6 Modification du prompt audio
+
+**Objectif** - Vérifier qu’un prompt peut être remplacé par un fichier local autorisé.
+
+Actions :
+
+- sélectionner le noeud `Main Menu`
+- importer un fichier `.mp3`, `.mp4` ou `.wav`
+
+Résultat attendu :
+
+- le prompt affiché prend le nom du fichier importé
+- le noeud passe en état modifié
+- le bouton/sidebar associé montre un indicateur de modification
+- aucune erreur bloquante n’est affichée
+
+Formats autorisés :
+
+```txt
+.mp3
+.mp4
+.wav
+```
+
+### 5.7 Refus d’un prompt invalide
+
+**Objectif** - Vérifier que les fichiers non autorisés sont refusés.
+
+Action :
+
+- importer un fichier non autorisé, par exemple `.txt`, `.pdf`, `.jpg`
+
+Résultat attendu :
+
+```txt
+Invalid prompt file. Allowed formats: MP3, MP4, WAV.
+```
+
+Le prompt existant ne doit pas être remplacé.
+
+### 5.8 Modification des paramètres simples
+
+**Objectif** - Vérifier que les champs éditables peuvent être modifiés.
+
+Actions :
+
+- modifier `Timeout`
+- modifier `Retries`
+
+Résultat attendu :
+
+- la valeur est mise à jour dans le Detail Panel
+- le noeud passe en état modifié
+- aucune erreur n’apparaît si les valeurs restent valides
+
+### 5.9 Modification DTMF valide
+
+**Objectif** - Vérifier qu’une destination DTMF peut être modifiée vers une destination existante.
+
+Action :
+
+- modifier une destination DTMF avec un ID existant
+
+Résultat attendu :
+
+- la modification est acceptée
+- le noeud passe en état modifié
+- la validation reste valide
+
+### 5.10 Erreur DTMF invalide
+
+**Objectif** - Vérifier qu’une destination inexistante est détectée.
+
+Action :
+
+- modifier une destination DTMF avec une valeur inexistante
+
+Résultat attendu :
+
+- le noeud concerné affiche un indicateur d’erreur
+- l’élément sidebar correspondant affiche un indicateur d’erreur
+- le Detail Panel affiche une erreur de validation
+- `Apply to EZVMS` est bloqué
+
+### 5.11 Validation manuelle
+
+**Objectif** - Vérifier le bouton `Validate`.
+
+Action :
+
+- cliquer sur `Validate`
+
+Résultat attendu si valide :
+
+```txt
+Validation passed.
+```
+
+Résultat attendu si invalide :
+
+```txt
+Validation failed. Check highlighted blocks.
+```
+
+### 5.12 Refresh des données locales
+
+**Objectif** - Vérifier que le bouton `Refresh` annule les modifications locales.
+
+Actions :
+
+- modifier un prompt ou une destination DTMF
+- cliquer sur `Refresh`
+
+Résultat attendu :
+
+- les données reviennent à l’état initial
+- les indicateurs de modification disparaissent
+- les erreurs disparaissent
+- aucune sélection n’est active
+
+### 5.13 Application vers EZVMS
+
+**Objectif** - Vérifier que l’application demande confirmation et bloque les erreurs.
+
+Cas valide :
+
+- effectuer une modification valide
+- cliquer sur `Apply to EZVMS`
+- confirmer
+
+Résultat attendu :
+
+```txt
+Modifications have been sent!
+```
+
+Cas invalide :
+
+- créer une erreur
+- cliquer sur `Apply to EZVMS`
+
+Résultat attendu :
+
+```txt
+Cannot apply: blocking validation errors exist.
+```
+
+Aucune application ne doit être simulée si la validation est invalide.
+
+------

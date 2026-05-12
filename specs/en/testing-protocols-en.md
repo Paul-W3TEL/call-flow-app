@@ -1,20 +1,21 @@
 # Testing protocols
 
 - **Document title** > Testing protocols
-- **Version** > 1.1
+- **Version** > 1.2
 - **Status** > Internal draft
 - **Author** > Paul Koster
-- **Date** > May 11th 2026
+- **Date** > May 12th 2026
 - **Confidentiality** > Internal document – W3TEL / TEQTEL
 
 ------
 
 ## Version history
 
-| Version | Date          | Author      | Description           |
-| ------- | ------------- | ----------- | --------------------- |
-| 1.0     | May 11th 2026 | Paul Koster | Initial version       |
-| 1.1     | May 11th 2026 | Paul Koster | API Testing protocols |
+| Version | Date          | Author      | Description                |
+| ------- | ------------- | ----------- | -------------------------- |
+| 1.0     | May 11th 2026 | Paul Koster | Initial version            |
+| 1.1     | May 11th 2026 | Paul Koster | API testing protocols      |
+| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols |
 
 ------
 
@@ -399,4 +400,259 @@ Expected answer
 }
 ```
 
------
+------
+
+## 5. Frontend testing protocols
+
+### 5.1 Opening the example frontend
+
+**Goal** - Check if the example frontend opens correctly
+
+From the local post, open:
+
+```txt
+frontend/index.html
+```
+
+Expected result:
+
+- the Diamy header is visible
+- the sidebar is visible
+- the Graph Canvas is visible
+- the Detail Panel is visible
+- The status bar is visible
+
+Possible errors:
+
+```txt
+blank page
+styles not loaded
+script not loaded
+```
+
+Possible actions:
+
+- check if `index.html`, `styles.css` and `app.js` are all in the same folder
+- open the navigator console
+- check JavaScript errors
+
+### 5.2 Sidebar selection
+
+**Goal** - Check if every sidebar element selects the correct blocks
+
+Actions:
+
+- click on the entry point
+- click on each nodes
+- click on each target
+
+Expected result:
+
+- the Detail Panel correctly displays informations about the selected element
+- the selected element appears in the sidebar using the selection style
+- the corresponding block appears in the graph using the selection style
+
+### 5.3 Graph Canvas Selection 
+
+**Goal** - Check if graph blocks are interactives
+
+Actions:
+
+- click on the entry point
+- click on each nodes
+- click on each target
+
+Expected result:
+
+- the cursor becomes clickable on hover
+- the Detail Panel displays correct information
+- le selected block is visually identifiable
+- the corresponding sidebar button is also selected
+
+### 5.4 Synchronised hover
+
+**Goal** - Check if the sidebar and graph hovers are synchronised
+
+Actions:
+
+- Hover a sidebar element
+- Observe the corresponding graph block
+- Hover a graph block
+- Observe the corresponding sidebar button
+- Stop hovering
+
+Expected result:
+
+- linked elements use the hover color
+- the hover color is different than the selection color
+- hovered states disappear when the mouse leaves the element
+- the selected state remains visible after the hover
+
+### 5.5 Unselection
+
+**Goal** - Check if the user can go back to a selectionless state
+
+Action :
+
+- click the `Unselect` button
+
+Expected result:
+
+- no sidebar element is selected
+- no graph block is selected
+- the Detail panel displays:
+
+```txt
+Waiting for selection
+```
+
+### 5.6 Audio prompt modification
+
+**Goal** - Check if a prompt can be replaced by a valid local file
+
+Actions:
+
+- select a node
+- import an `.mp3`, `.mp4` or `.wav` file
+
+Expected result:
+
+- the displayed prompt is now the name of the imported file
+- the node switches to a modified state
+- the associated sidebar element shows a modified indicator
+- no blocking error is seen
+
+Formats autorisés :
+
+```txt
+.mp3
+.mp4
+.wav
+```
+
+### 5.7 Invalid audio prompt
+
+**Goal** - Check if invalid files are rejected
+
+Action :
+
+- import an invalid file, sucha as `.txt`, `.pdf`, `.jpg`
+
+Expected result:
+
+```txt
+Invalid prompt file. Allowed formats: MP3, MP4, WAV.
+```
+
+The existing prompt must not be replaced
+
+### 5.8 Simple parameters modification
+
+**Goal** - Check if editable fields can be modifiable
+
+Actions:
+
+- modify `Timeout`
+- modify `Retries`
+
+Expected result:
+
+- the value is updated in the Detail Panel
+- the node switches to a modified state
+- no error is seen as long as entered values are valid
+
+### 5.9 Valid DTMF modification
+
+**Goal** - Check if a DTMF destination can be modified to an existing destination
+
+Action :
+
+- modify a DTMF destination with an existing ID
+
+Expected result:
+
+- the modification is accepted
+- the node switches to a modified state
+- the validation remains valid
+
+### 5.10 Invalid DTMF
+
+**Goal** - Check if an non-existant destination is detected
+
+Action :
+
+- modify a DTMF destination with a non-existant ID
+
+Expected result:
+
+- the node displays an error indicator
+- the associated sidebar element displays an error indicator
+- the Detail Panem show a validation error
+- `Apply to EZVMS` is blocked
+
+### 5.11 Manual validation
+
+**Goal** - Check the `Validate` button
+
+Action :
+
+- click `Validate`
+
+Expected result is valid:
+
+```txt
+Validation passed.
+```
+
+Expected result if invalid
+
+```txt
+Validation failed. Check highlighted blocks.
+```
+
+### 5.12 Local data refresh
+
+**Goal** - Check if the `Refresh` button cancels all local modifications
+
+Actions:
+
+- modify a prompt or a DTMF destination
+- click `Refresh`
+
+Expected result:
+
+- data come back to their initial state
+- modification indicators disappear
+- errors disappear
+- no selection is active
+
+### 5.13 Application to EZVMS
+
+**Goal** - Check if the application asks for confirmation and blocks errors
+
+Valid case:
+
+- make a valid modification
+- click `Apply to EZVMS`
+- confir
+
+Expected result:
+
+```txt
+Modifications have been sent!
+```
+
+Invalid case:
+
+- create an error
+- click `Apply to EZVMS`
+
+Expected result:
+
+```txt
+Cannot apply: blocking validation errors exist.
+```
+
+No application can be simulated if the validation is invalid
+
+------

@@ -561,22 +561,40 @@ Résultat attendu :
 - le noeud passe en état modifié
 - aucune erreur n’apparaît si les valeurs restent valides
 
-### 5.9 Modification excessive
+### 5.9 Modification incorrect
 
-**Objectif** - Vérifier qu'entrer trop de réessais empêche la validation
+**Objectif** - Vérifier qu'entrer des valeurs négatives bloque la validation
 
-Actions :
+Actions : 
 
-- entrer un nombre très large dans `Retries`
+- entrer un nombre négatif dans `Timeout`
+- entrer un nombre négatif dans `Retries`
 
-Résultat attendu : 
+Résultat attendu :
 
 - le noeud concerné affiche un indicateur d’erreur
 - l’élément sidebar correspondant affiche un indicateur d’erreur
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.10 Modification DTMF valide
+### 5.10 Modification incohérente
+
+**Objectif** - Vérifier qu'entrer des valeurs incohérente lève une alerte
+
+Actions :
+
+- entrer un nombre très large dans `Retries`
+- entrer 0 dans `Retries`
+- entrer 0 dans `Timeout`
+
+Résultat attendu : 
+
+- le noeud concerné affiche un indicateur d'alerte
+- l’élément sidebar correspondant affiche un indicateur d’alerte
+- le Detail Panel affiche une alerte de validation
+- `Apply to EZVMS` n'est pas bloqué
+
+### 5.11 Modification DTMF valide
 
 **Objectif** - Vérifier qu’une destination DTMF peut être modifiée vers une destination existante.
 
@@ -590,7 +608,7 @@ Résultat attendu :
 - le noeud passe en état modifié
 - la validation reste valide
 
-### 5.11 Erreur DTMF invalide
+### 5.12 Erreur DTMF invalide
 
 **Objectif** - Vérifier qu’une destination inexistante est détectée.
 
@@ -605,7 +623,7 @@ Résultat attendu :
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.12 Validation manuelle
+### 5.13 Validation manuelle
 
 **Objectif** - Vérifier le bouton `Validate`.
 
@@ -625,7 +643,7 @@ Résultat attendu si invalide :
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.13 Refresh des données locales
+### 5.14 Refresh des données locales
 
 **Objectif** - Vérifier que le bouton `Refresh` annule les modifications locales.
 
@@ -641,7 +659,7 @@ Résultat attendu :
 - les erreurs disparaissent
 - aucune sélection n’est active
 
-### 5.14 Application vers EZVMS
+### 5.15 Application vers EZVMS
 
 **Objectif** - Vérifier que l’application demande confirmation et bloque les erreurs.
 

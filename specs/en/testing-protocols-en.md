@@ -561,22 +561,40 @@ Expected result:
 - the node switches to a modified state
 - no error is seen as long as entered values are valid
 
-### 5.9 Excessive modification
+### 5.9 Incorrect modification
 
-**Goal** - Check if entering to many retries blocks validation
+**Goal** - Check if entering negative values blocks modifications
 
-Actions :
+Actions:
 
-- enter a very large number in `Retries`
+- enter a negative number in `Timeout`
+- enter a negative number in `Retries`
 
-Expected result: 
+Expected result:
 
 - the node displays an error indicator
 - the associated sidebar element displays an error indicator
 - the Detail Panem show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.10 Valid DTMF modification
+### 5.10 Incoherent modification
+
+**Goal** - Check if entering incoherent values raises an alert
+
+Actions :
+
+- enter a very large number in `Retries`
+- enter 0 in `Retries`
+- enter 0 in `Timeout`
+
+Expected result: 
+
+- the node displays an alert indicator
+- the associated sidebar element displays an alert indicator
+- the Detail Panem show a validation alert
+- `Apply to EZVMS` is not blocked
+
+### 5.11 Valid DTMF modification
 
 **Goal** - Check if a DTMF destination can be modified to an existing destination
 
@@ -590,7 +608,7 @@ Expected result:
 - the node switches to a modified state
 - the validation remains valid
 
-### 5.11 Invalid DTMF
+### 5.12 Invalid DTMF
 
 **Goal** - Check if an non-existant destination is detected
 
@@ -605,7 +623,7 @@ Expected result:
 - the Detail Panem show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.12 Manual validation
+### 5.13 Manual validation
 
 **Goal** - Check the `Validate` button
 
@@ -625,7 +643,7 @@ Expected result if invalid
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.13 Local data refresh
+### 5.14 Local data refresh
 
 **Goal** - Check if the `Refresh` button cancels all local modifications
 
@@ -641,7 +659,7 @@ Expected result:
 - errors disappear
 - no selection is active
 
-### 5.14 Application to EZVMS
+### 5.15 Application to EZVMS
 
 **Goal** - Check if the application asks for confirmation and blocks errors
 

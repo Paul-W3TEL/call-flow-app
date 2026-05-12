@@ -52,6 +52,14 @@ const callFlow = {
   ],
 };
 
+const originalCallFlow = structuredClone(callFlow);
+
+let validationState = {
+  status: "valid",
+  errors: [],
+  warnings: [],
+};
+
 let selectedType = "entry";
 let selectedId = "entry_point";
 
@@ -59,6 +67,7 @@ let hoveredType = null;
 let hoveredId = null;
 
 function render() {
+  validateCallFlow();
   document.getElementById("companyName").textContent = callFlow.company.name;
   document.getElementById("pilotNumber").textContent =
     callFlow.entry_point.pilot_number;
@@ -67,6 +76,7 @@ function render() {
   renderGraph();
   renderDetails();
 }
+
 function renderSidebar() {
   const entryPointItem = document.getElementById("entryPointItem");
   const nodeList = document.getElementById("nodeList");
@@ -224,31 +234,83 @@ function renderDetails() {
     const node = callFlow.nodes.find((item) => item.id === selectedId);
 
     detail.innerHTML = `
-      <div class="detail-section">
-        <div class="panel-title">General</div>
-        ${row("Node ID", node.id)}
-        ${row("Type", node.type)}
-        ${row("Label", node.label)}
+  <div class="detail-section">
+    <div class="panel-title">General</div>
+    ${row("Node ID", node.id)}
+    ${row("Type", node.type)}
+    ${row("Label", node.label)}
+  </div>
+
+  <div class="detail-section">
+    <div class="panel-title">Editable Fields</div>
+
+    <div class="edit-field">
+      <label>Main Prompt</label>
+      <input
+        class="di-input"
+        type="file"
+        accept=".mp3,.mp4,.wav,audio/mpeg,audio/wav,video/mp4"
+        onchange="updatePromptFile('${node.id}', this.files[0])"
+        />
+
+        <div class="helper">
+        Current prompt: <span class="mono">${node.prompt || "No file selected"}</span>
+        </div>
+    </div>
+
+    <div class="edit-field">
+      <label>Timeout</label>
+      <input
+        class="di-input"
+        type="number"
+        value="${node.settings.timeout}"
+        onchange="updateNodeField('${node.id}', 'timeout', this.value)"
+      />
+    </div>
+
+    <div class="edit-field">
+      <label>Retries</label>
+      <input
+        class="di-input"
+        type="number"
+        value="${node.settings.retries}"
+        onchange="updateNodeField('${node.id}', 'retries', this.value)"
+      />
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <div class="panel-title">DTMF Actions</div>
+
+    ${Object.entries(node.dtmf)
+      .map(
+        ([key, value]) => `
+      <div class="edit-field">
+        <label>Key ${key}</label>
+        <input
+          class="di-input"
+          value="${value}"
+          onchange="updateDtmf('${node.id}', '${key}', this.value)"
+        />
       </div>
-            
-      <div class="detail-section">
-        <div class="panel-title">Prompt</div>
-        ${row("Main Prompt", node.prompt)}
-      </div>
-            
-      <div class="detail-section">
-        <div class="panel-title">DTMF Actions</div>
-        ${Object.entries(node.dtmf)
-          .map(([key, value]) => row(key, value))
-          .join("")}
-      </div>
-            
-      <div class="detail-section">
-        <div class="panel-title">Settings</div>
-        ${row("Timeout", node.settings.timeout)}
-        ${row("Retries", node.settings.retries)}
-      </div>
-    `;
+    `,
+      )
+      .join("")}
+  </div>
+
+  <div class="detail-section">
+    <div class="panel-title">Validation</div>
+    ${
+      validationState.errors
+        .filter((error) => error.owner === nodeKey(node.id))
+        .map(
+          (error) =>
+            `<div class="validation-error">${error.code}: ${error.message}</div>`,
+        )
+        .join("") || `<div class="helper">No blocking error.</div>`
+    }
+  </div>
+`;
 
     return;
   }
@@ -288,7 +350,89 @@ function itemClasses(type, id) {
     classes.push("active");
   }
 
+  if (isModified(type, id)) {
+    classes.push("modified");
+  }
+
+  if (hasError(type, id)) {
+    classes.push("has-error");
+  }
+
   return classes.join(" ");
+}
+
+function updateNodeField(nodeId, field, value) {
+  const node = callFlow.nodes.find((item) => item.id === nodeId);
+
+  if (!node) return;
+
+  if (field === "prompt") {
+    node.prompt = value;
+  }
+
+  if (field === "timeout") {
+    node.settings.timeout = Number(value);
+  }
+
+  if (field === "retries") {
+    node.settings.retries = Number(value);
+  }
+
+  validateCallFlow();
+  render();
+}
+
+function updateDtmf(nodeId, key, value) {
+  const node = callFlow.nodes.find((item) => item.id === nodeId);
+
+  if (!node) return;
+
+  node.dtmf[key] = value;
+
+  validateCallFlow();
+  render();
+}
+
+function refreshData() {
+  Object.assign(callFlow, structuredClone(originalCallFlow));
+  validationState = {
+    status: "valid",
+    errors: [],
+    warnings: [],
+  };
+
+  selectedType = null;
+  selectedId = null;
+
+  render();
+  alert("Local mock data refreshed.");
+}
+
+function runManualValidation() {
+  const result = validateCallFlow();
+  render();
+
+  if (result.status === "valid") {
+    alert("Validation passed.");
+  } else {
+    alert("Validation failed. Check highlighted blocks.");
+  }
+}
+
+function applyToEzvms() {
+  const result = validateCallFlow();
+  render();
+
+  if (result.status === "invalid") {
+    alert("Cannot apply: blocking validation errors exist.");
+    return;
+  }
+
+  const confirmed = confirm("Apply changes to EZVMS?");
+
+  if (!confirmed) return;
+
+  alert("Modifications have been sent!");
 }
 
 function linkKey(type, id) {
@@ -308,6 +452,104 @@ function clearSelection() {
   selectedType = null;
   selectedId = null;
   render();
+}
+
+function nodeKey(id) {
+  return `node:${id}`;
+}
+
+function targetKey(id) {
+  return `target:${id}`;
+}
+
+function entryKey() {
+  return "entry:entry_point";
+}
+
+function isModified(type, id) {
+  if (type !== "node") return false;
+
+  const current = callFlow.nodes.find((node) => node.id === id);
+  const original = originalCallFlow.nodes.find((node) => node.id === id);
+
+  return JSON.stringify(current) !== JSON.stringify(original);
+}
+
+function hasError(type, id) {
+  const key = type === "entry" ? entryKey() : `${type}:${id}`;
+  return validationState.errors.some((error) => error.owner === key);
+}
+
+function validateCallFlow() {
+  const errors = [];
+  const warnings = [];
+
+  const nodeIds = callFlow.nodes.map((node) => node.id);
+  const targetIds = callFlow.targets.map((target) => target.id);
+  const validDestinations = [...nodeIds, ...targetIds];
+
+  if (!nodeIds.includes(callFlow.entry_point.start_node_id)) {
+    errors.push({
+      code: "InvalidStartNode",
+      owner: entryKey(),
+      message: "Start node does not exist.",
+    });
+  }
+
+  callFlow.nodes.forEach((node) => {
+    const owner = nodeKey(node.id);
+
+    if (node.type === "menu" && (!node.prompt || node.prompt.trim() === "")) {
+      errors.push({
+        code: "MissingMainPrompt",
+        owner,
+        message: "Menu must have a main prompt.",
+      });
+    }
+
+    if (node.type === "menu" && Object.keys(node.dtmf).length === 0) {
+      errors.push({
+        code: "EmptyAction",
+        owner,
+        message: "Menu must have at least one DTMF action.",
+      });
+    }
+
+    Object.entries(node.dtmf).forEach(([key, destination]) => {
+      if (!/^[0-9#*]$/.test(key)) {
+        errors.push({
+          code: "InvalidDTMF",
+          owner,
+          message: `Invalid DTMF key: ${key}`,
+        });
+      }
+
+      if (!validDestinations.includes(destination)) {
+        errors.push({
+          code: "InvalidTarget",
+          owner,
+          message: `Invalid destination: ${destination}`,
+        });
+      }
+    });
+
+    if (node.settings.retries > 5) {
+      warnings.push({
+        code: "HighRetryCount",
+        owner,
+        message: "Retry count is unusually high.",
+      });
+    }
+  });
+
+  validationState = {
+    status:
+      errors.length > 0 ? "invalid" : warnings.length > 0 ? "warning" : "valid",
+    errors,
+    warnings,
+  };
+
+  return validationState;
 }
 
 render();

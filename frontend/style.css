@@ -405,3 +405,34 @@ body {
   background: var(--bg-sidebar-hover);
   color: var(--text-primary);
 }
+
+.list-item.modified,
+.graph-node.modified {
+  border-style: dashed;
+}
+
+.list-item.has-error,
+.graph-node.has-error {
+  border-color: var(--error);
+  box-shadow:
+    0 0 0 3px rgba(214, 69, 69, 0.2),
+    var(--shadow-card);
+}
+
+.validation-error {
+  color: var(--error);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.edit-field {
+  margin-bottom: var(--space-3);
+}
+
+.edit-field label {
+  display: block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+}

@@ -32,9 +32,18 @@
           <button class="di-btn di-btn-light" onclick="clearSelection()">
             Unselect
           </button>
-          <button class="di-btn di-btn-secondary">Refresh</button>
-          <button class="di-btn di-btn-secondary">Validate</button>
-          <button class="di-btn di-btn-primary">Apply to EZVMS</button>
+          <button class="di-btn di-btn-secondary" onclick="refreshData()">
+            Refresh
+          </button>
+          <button
+            class="di-btn di-btn-secondary"
+            onclick="runManualValidation()"
+          >
+            Validate
+          </button>
+          <button class="di-btn di-btn-primary" onclick="applyToEzvms()">
+            Apply to EZVMS
+          </button>
         </div>
       </header>
 

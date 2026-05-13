@@ -20,9 +20,54 @@ const callFlow = {
       label: "Main Menu",
       prompt: "welcome.wav",
       dtmf: {
-        1: "target_sales",
-        2: "target_support",
-        9: "target_operator",
+        1: "menu_2",
+        2: "playback_1",
+        3: "transfer_1",
+        9: "hangup"
+      },
+      settings: {
+        timeout: 5,
+        retries: 3,
+      },
+    },
+    {
+      id: "playback_1",
+      type: "playback",
+      label: "External transfer",
+      prompt: "external.wav",
+      dtmf: {
+        1: "external_1",
+        9: "menu_1"
+      },
+      settings: {
+        timeout: 5,
+        retries: 3,
+      },
+    },
+    {
+      id: "transfer_1",
+      type: "transfer",
+      label: "Transfer to voicemail",
+      prompt: "voicemail.wav",
+      dtmf: {
+        1: "voicemail_1",
+        9: "menu_1",
+      },
+      settings: {
+        timeout: 5,
+        retries: 3,
+      },
+    },
+    {
+      id: "menu_2",
+      type: "menu",
+      label: "Choose your correspondant",
+      prompt: "choice.wav",
+      dtmf: {
+        1: "hr",
+        2: "comptability",
+        3: "production",
+        9: "menu_1"
       },
       settings: {
         timeout: 5,
@@ -32,22 +77,40 @@ const callFlow = {
   ],
   targets: [
     {
-      id: "target_sales",
+      id: "hr",
       type: "extension",
-      label: "Sales",
+      label: "Human Ressources",
+      number: "1000",
+    },
+    {
+      id: "comptability",
+      type: "extension",
+      label: "Comptability",
       number: "1001",
     },
     {
-      id: "target_support",
+      id: "production",
       type: "extension",
-      label: "Support",
+      label: "Production",
       number: "1002",
     },
     {
-      id: "target_operator",
-      type: "extension",
-      label: "Operator",
-      number: "1000",
+      id: "voicemail_1",
+      type: "voicemail",
+      label: "Voicemail",
+      number: "1003",
+    },
+    {
+      id: "external_1",
+      type: "external_number",
+      label: "External partner",
+      number: "1004",
+    },
+    {
+      id: "hangup",
+      type: "hangup",
+      label: "End of call",
+      number: "1005",
     },
   ],
 };
@@ -60,8 +123,8 @@ let validationState = {
   warnings: [],
 };
 
-let selectedType = "entry";
-let selectedId = "entry_point";
+let selectedType = null;
+let selectedId = null;
 
 let hoveredType = null;
 let hoveredId = null;
@@ -75,6 +138,7 @@ function render() {
   renderSidebar();
   renderGraph();
   renderDetails();
+  renderStatusBar();
 }
 
 function renderSidebar() {
@@ -133,14 +197,95 @@ function renderSidebar() {
 function renderGraph() {
   const canvas = document.getElementById("graphCanvas");
 
-  const menu = callFlow.nodes[0];
+  const nodes = callFlow.nodes;
   const targets = callFlow.targets;
 
+  const nodeWidth = 210;
+  const nodeHeight = 110;
+  const columnGap = 300;
+  const rowGap = 150;
+
+  const entryX = 40;
+  const nodeX = entryX + columnGap;
+  const targetX = nodeX + columnGap * 2;
+
+  const maxRows = Math.max(nodes.length, targets.length, 1);
+  const canvasHeight = Math.max(700, maxRows * rowGap + 160);
+  const canvasWidth = Math.max(1100, targetX + nodeWidth + 120);
+
+  canvas.style.height = `${canvasHeight}px`;
+  canvas.style.minWidth = `${canvasWidth}px`;
+
+  const positions = {};
+
+  positions.entry_point = {
+    x: entryX,
+    y: canvasHeight / 2 - nodeHeight / 2
+  };
+
+  nodes.forEach((node, index) => {
+    positions[node.id] = {
+      x: nodeX,
+      y: 80 + index * rowGap
+    };
+  });
+
+  targets.forEach((target, index) => {
+    positions[target.id] = {
+      x: targetX,
+      y: 80 + index * rowGap
+    };
+  });
+
+  const allObjects = {
+    entry_point: callFlow.entry_point,
+    ...Object.fromEntries(nodes.map((node) => [node.id, node])),
+    ...Object.fromEntries(targets.map((target) => [target.id, target]))
+  };
+
+  const links = [];
+
+  links.push({
+    from: "entry_point",
+    to: callFlow.entry_point.start_node_id,
+    label: "start"
+  });
+
+  nodes.forEach((node) => {
+    Object.entries(node.dtmf || {}).forEach(([key, destinationId]) => {
+      if (!allObjects[destinationId]) return;
+
+      links.push({
+        from: node.id,
+        to: destinationId,
+        label: `DTMF ${key}`
+      });
+    });
+  });
+
   canvas.innerHTML = `
+    ${links.map((link, index) => {
+      const from = positions[link.from];
+      const to = positions[link.to];
+
+      if (!from || !to) return "";
+
+      return drawSmartLink(
+        from.x,
+        from.y,
+        to.x,
+        to.y,
+        nodeWidth,
+        nodeHeight,
+        link.label,
+        index
+      );
+    }).join("")}
+
     <div
-      class="graph-node entry ${itemClasses("entry", "entry_point")}"
+      class="graph-node ${graphTypeClass("entry", "entry_point")} ${itemClasses("entry", "entry_point")}"
       data-link-key="${linkKey("entry", "entry_point")}"
-      style="left: 40px; top: 250px;"
+      style="left: ${positions.entry_point.x}px; top: ${positions.entry_point.y}px;"
       onclick="selectItem('entry', 'entry_point')"
       onmouseenter="setLinkedHover('entry', 'entry_point', true)"
       onmouseleave="setLinkedHover('entry', 'entry_point', false)"
@@ -150,48 +295,37 @@ function renderGraph() {
       <div class="helper">Start node: ${callFlow.entry_point.start_node_id}</div>
     </div>
 
-    <div class="graph-line" style="left: 250px; top: 310px; width: 150px;"></div>
+    ${nodes.map((node) => `
+      <div
+        class="graph-node ${graphTypeClass("node", node.type)} ${itemClasses("node", node.id)}"
+        data-link-key="${linkKey("node", node.id)}"
+        style="left: ${positions[node.id].x}px; top: ${positions[node.id].y}px;"
+        onclick="selectItem('node', '${node.id}')"
+        onmouseenter="setLinkedHover('node', '${node.id}', true)"
+        onmouseleave="setLinkedHover('node', '${node.id}', false)"
+      >
+        <div class="graph-title">${node.label}</div>
+        <div class="graph-id">${node.id}</div>
+        <div class="helper">Prompt: ${node.prompt || "None"}</div>
+        <div class="helper">Retries: ${node.settings?.retries ?? "-"}</div>
+      </div>
+    `).join("")}
 
-    <div
-      class="graph-node ${itemClasses("node", menu.id)}"
-      data-link-key="${linkKey("node", menu.id)}"
-      style="left: 400px; top: 220px;"
-      onclick="selectItem('node', '${menu.id}')"
-      onmouseenter="setLinkedHover('node', '${menu.id}', true)"
-      onmouseleave="setLinkedHover('node', '${menu.id}', false)"
-    >
-      <div class="graph-title">${menu.label}</div>
-      <div class="graph-id">${menu.id}</div>
-      <div class="helper">Prompt: ${menu.prompt}</div>
-      <div class="helper">Retries: ${menu.settings.retries}</div>
-    </div>
-
-    ${targets
-      .map((target, index) => {
-        const y = 90 + index * 170;
-        const key =
-          Object.keys(menu.dtmf).find((k) => menu.dtmf[k] === target.id) || "?";
-
-        return `
-          <div class="graph-line" style="left: 610px; top: ${290}px; width: 150px; transform: rotate(${index === 0 ? -38 : index === 1 ? 0 : 38}deg);"></div>
-          <div class="graph-dtmf" style="left: 690px; top: ${y + 70}px;">DTMF ${key}</div>
-
-          <div
-            class="graph-node target ${itemClasses("target", target.id)}"
-            data-link-key="${linkKey("target", target.id)}"
-            style="left: 780px; top: ${y}px;"
-            onclick="selectItem('target', '${target.id}')"
-            onmouseenter="setLinkedHover('target', '${target.id}', true)"
-            onmouseleave="setLinkedHover('target', '${target.id}', false)"
-          >
-            <div class="graph-title">${target.label}</div>
-            <div class="graph-id">${target.id}</div>
-            <div class="helper">${target.type}</div>
-            <div class="helper mono">${target.number}</div>
-          </div>
-        `;
-      })
-      .join("")}
+    ${targets.map((target) => `
+      <div
+        class="graph-node ${graphTypeClass("target", target.type)} ${itemClasses("target", target.id)}"
+        data-link-key="${linkKey("target", target.id)}"
+        style="left: ${positions[target.id].x}px; top: ${positions[target.id].y}px;"
+        onclick="selectItem('target', '${target.id}')"
+        onmouseenter="setLinkedHover('target', '${target.id}', true)"
+        onmouseleave="setLinkedHover('target', '${target.id}', false)"
+      >
+        <div class="graph-title">${target.label}</div>
+        <div class="graph-id">${target.id}</div>
+        <div class="helper">${target.type}</div>
+        <div class="helper mono">${target.number}</div>
+      </div>
+    `).join("")}
   `;
 }
 
@@ -300,14 +434,22 @@ function renderDetails() {
 
   <div class="detail-section">
     <div class="panel-title">Validation</div>
+
+    ${validationState.errors
+      .filter((error) => error.owner === nodeKey(node.id))
+      .map((error) => `<div class="validation-error">${error.code}: ${error.message}</div>`)
+      .join("")}
+
+    ${validationState.warnings
+      .filter((warning) => warning.owner === nodeKey(node.id))
+      .map((warning) => `<div class="validation-warning">${warning.code}: ${warning.message}</div>`)
+      .join("")}
+
     ${
-      validationState.errors
-        .filter((error) => error.owner === nodeKey(node.id))
-        .map(
-          (error) =>
-            `<div class="validation-error">${error.code}: ${error.message}</div>`,
-        )
-        .join("") || `<div class="helper">No blocking error.</div>`
+      validationState.errors.filter((error) => error.owner === nodeKey(node.id)).length === 0 &&
+      validationState.warnings.filter((warning) => warning.owner === nodeKey(node.id)).length === 0
+        ? `<div class="helper">No validation issue.</div>`
+        : ""
     }
   </div>
 `;
@@ -356,6 +498,8 @@ function itemClasses(type, id) {
 
   if (hasError(type, id)) {
     classes.push("has-error");
+  } else if (hasWarning(type, id)) {
+    classes.push("has-warning");
   }
 
   return classes.join(" ");
@@ -393,8 +537,41 @@ function updateDtmf(nodeId, key, value) {
   render();
 }
 
+function updatePromptFile(nodeId, file) {
+  const node = callFlow.nodes.find((item) => item.id === nodeId);
+  if (!node || !file) return;
+
+  const allowedExtensions = [".mp3", ".mp4", ".wav"];
+  const fileName = file.name.toLowerCase();
+
+  const isAllowed = allowedExtensions.some((extension) =>
+    fileName.endsWith(extension),
+  );
+
+  if (!isAllowed) {
+    validationState.errors.push({
+      code: "InvalidPromptFile",
+      owner: nodeKey(nodeId),
+      message: "Invalid prompt file. Allowed formats: MP3, MP4, WAV.",
+    });
+
+    render();
+    alert("Invalid prompt file. Allowed formats: MP3, MP4, WAV.");
+    return;
+  }
+
+  node.prompt = file.name;
+  validateCallFlow();
+  render();
+}
+
 function refreshData() {
+  const confirmed = confirm("Refresh data? Local modifications will be lost.");
+
+  if (!confirmed) return;
+
   Object.assign(callFlow, structuredClone(originalCallFlow));
+
   validationState = {
     status: "valid",
     errors: [],
@@ -414,6 +591,8 @@ function runManualValidation() {
 
   if (result.status === "valid") {
     alert("Validation passed.");
+  } else if (result.status === "warning") {
+    alert("Validation passed, but warnings have been found. Check highlighted blocks.");
   } else {
     alert("Validation failed. Check highlighted blocks.");
   }
@@ -428,7 +607,8 @@ function applyToEzvms() {
     return;
   }
 
-  const confirmed = confirm("Apply changes to EZVMS?");
+  const confirmed = (result.status === "warning") ? confirm("Validation has found warnings that may block the application. Apply changes to EZVMS?")
+                                                  : confirm("Apply changes to EZVMS?");
 
   if (!confirmed) return;
 
@@ -480,6 +660,12 @@ function hasError(type, id) {
   return validationState.errors.some((error) => error.owner === key);
 }
 
+function hasWarning(type, id) {
+  const key = type === "entry" ? entryKey() : `${type}:${id}`;
+
+  return validationState.warnings.some((warning) => warning.owner === key);
+}
+
 function validateCallFlow() {
   const errors = [];
   const warnings = [];
@@ -498,6 +684,75 @@ function validateCallFlow() {
 
   callFlow.nodes.forEach((node) => {
     const owner = nodeKey(node.id);
+
+  const destinationToKeys = {};
+
+  Object.entries(node.dtmf).forEach(([key, destination]) => {
+    if (!destinationToKeys[destination]) {
+      destinationToKeys[destination] = [];
+    }
+
+    destinationToKeys[destination].push(key);
+  });
+
+  Object.entries(destinationToKeys).forEach(([destination, keys]) => {
+    if (keys.length > 1) {
+      warnings.push({
+        code: "DuplicateDTMFDestination",
+        owner,
+        message: `DTMF keys ${keys.join(", ")} point to the same destination: ${destination}.`
+      });
+    }
+  });
+
+    const timeout = Number(node.settings.timeout);
+    const retries = Number(node.settings.retries);
+
+    if (Number.isNaN(timeout)) {
+      errors.push({
+        code: "InvalidTimeout",
+        owner,
+        message: "Timeout must be a number.",
+      });
+    } else if (timeout < 0) {
+      errors.push({
+        code: "InvalidTimeout",
+        owner,
+        message: "Timeout cannot be negative.",
+      });
+    } else if (timeout === 0) {
+      warnings.push({
+        code: "ZeroTimeout",
+        owner,
+        message: "Timeout is set to 0 seconds.",
+      });
+    }
+
+    if (Number.isNaN(retries)) {
+      errors.push({
+        code: "InvalidRetries",
+        owner,
+        message: "Retries must be a number.",
+      });
+    } else if (retries < 0) {
+      errors.push({
+        code: "InvalidRetries",
+        owner,
+        message: "Retries cannot be negative.",
+      });
+    } else if (retries === 0) {
+      warnings.push({
+        code: "ZeroRetries",
+        owner,
+        message: "Retries are disabled.",
+      });
+    } else if (retries > 5) {
+      warnings.push({
+        code: "HighRetryCount",
+        owner,
+        message: "Retry count is unusually high.",
+      });
+    }
 
     if (node.type === "menu" && (!node.prompt || node.prompt.trim() === "")) {
       errors.push({
@@ -532,14 +787,6 @@ function validateCallFlow() {
         });
       }
     });
-
-    if (node.settings.retries > 5) {
-      warnings.push({
-        code: "HighRetryCount",
-        owner,
-        message: "Retry count is unusually high.",
-      });
-    }
   });
 
   validationState = {
@@ -550,6 +797,112 @@ function validateCallFlow() {
   };
 
   return validationState;
+}
+
+function renderStatusBar() {
+  const text = document.getElementById("validationStatusText");
+  const chip = document.getElementById("statusChip");
+
+  if (!text) return;
+
+  if (validationState.status === "invalid") {
+    text.textContent = `${validationState.errors.length} blocking error(s) detected`;
+    chip.textContent = "Error";
+
+    if (chip.classList.contains("chip-ok")) {
+      chip.classList.remove("chip-ok");
+    }
+    if (chip.classList.contains("chip-info")) {
+      chip.classList.remove("chip-info");
+    }
+
+    chip.classList.add("chip-warn");
+
+    return;
+  }
+
+  if (validationState.status === "warning") {
+    text.textContent = `${validationState.warnings.length} warning(s) detected`;
+    chip.textContent = "Warning";
+
+    if (chip.classList.contains("chip-ok")) {
+      chip.classList.remove("chip-ok");
+    }
+    if (chip.classList.contains("chip-warn")) {
+      chip.classList.remove("chip-warn");
+    }
+
+    chip.classList.add("chip-info");
+    return;
+  }
+
+  text.textContent = "No blocking validation error detected";
+  chip.textContent = "Clean";
+
+  if (chip.classList.contains("chip-info")) {
+    chip.classList.remove("chip-info");
+  }
+  if (chip.classList.contains("chip-warn")) {
+    chip.classList.remove("chip-warn");
+  }
+
+  chip.classList.add("chip-ok");
+}
+
+function drawSmartLink(fromX, fromY, toX, toY, width, height, label, index) {
+  const startX = fromX + width;
+  const startY = fromY + height / 2;
+
+  const endX = toX;
+  const endY = toY + height / 2;
+
+  const midX = startX + (endX - startX) / 2;
+  const offset = (index % 4) * 10;
+
+  const path = `
+    M ${startX} ${startY}
+    C ${midX + offset} ${startY},
+      ${midX + offset} ${endY},
+      ${endX} ${endY}
+  `;
+
+  const labelX = midX + offset - 24;
+  const labelY = startY + (endY - startY) / 2 - 12;
+
+  return `
+    <svg class="graph-link-layer">
+      <path
+        d="${path}"
+        class="graph-link-path"
+      />
+    </svg>
+
+    <div
+      class="graph-dtmf"
+      style="left: ${labelX}px; top: ${labelY}px;"
+    >
+      ${label}
+    </div>
+  `;
+}
+
+function graphTypeClass(itemType, objectType) {
+  if (itemType === "entry") return "type-entry";
+
+  if (itemType === "node") {
+    if (objectType === "menu") return "type-menu";
+    if (objectType === "transfer") return "type-transfer";
+    if (objectType === "playback") return "type-playback";
+  }
+
+  if (itemType === "target") {
+    if (objectType === "extension") return "type-extension";
+    if (objectType === "external_number") return "type-external";
+    if (objectType === "voicemail") return "type-voicemail";
+    if (objectType === "hangup") return "type-hangup";
+  }
+
+  return "type-unknown";
 }
 
 render();

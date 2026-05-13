@@ -200,15 +200,15 @@ body {
 }
 
 .chip-info {
-  background: rgba(58, 123, 213, 0.12);
+  background: rgba(213, 164, 58, 0.12);
   color: var(--info);
-  border: 1px solid rgba(58, 123, 213, 0.3);
+  border: 1px solid rgba(213, 190, 58, 0.3);
 }
 
 .chip-warn {
-  background: rgba(245, 166, 35, 0.12);
+  background: rgba(245, 35, 35, 0.12);
   color: var(--warning);
-  border: 1px solid rgba(245, 166, 35, 0.3);
+  border: 1px solid rgba(245, 35, 35, 0.3);
 }
 
 .mono {
@@ -290,8 +290,10 @@ body {
 }
 
 .graph-canvas {
-  min-height: 620px;
   position: relative;
+  overflow: auto;
+  min-height: 700px;
+  min-width: 100%;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
     linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px);
@@ -301,23 +303,79 @@ body {
   box-shadow: var(--shadow-card);
 }
 
+.graph-link-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.graph-link-path {
+  fill: none;
+  stroke: rgba(74, 79, 82, 0.35);
+  stroke-width: 2;
+}
+
 .graph-node {
   position: absolute;
   width: 210px;
+  min-height: 110px;
   background: var(--bg-card);
-  border: 2px solid var(--p500);
+  border: 5px solid var(--p500);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   padding: var(--space-3);
   cursor: pointer;
+  z-index: 5;
 }
 
-.graph-node.target {
-  border-color: #7d5ba6;
+.graph-dtmf {
+  position: absolute;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  z-index: 6;
 }
 
-.graph-node.entry {
-  border-color: var(--success);
+.graph-node.type-entry {
+  border-color: #4caf4f;
+}
+
+.graph-node.type-menu {
+  border-color: #3FA99C;
+}
+
+.graph-node.type-transfer {
+  border-color: #2F8F83;
+}
+
+.graph-node.type-playback {
+  border-color: #25786E;
+}
+
+.graph-node.type-extension {
+  border-color: #7D5BA6;
+}
+
+.graph-node.type-external {
+  border-color: #6A4C93;
+}
+
+.graph-node.type-voicemail {
+  border-color: #593C82;
+}
+
+.graph-node.type-hangup {
+  border-color: #482F6F;
+}
+
+.graph-node.type-unknown {
+  border-color: #6F7577;
 }
 
 .graph-title {
@@ -339,16 +397,6 @@ body {
   background: var(--text-muted);
   opacity: 0.55;
   transform-origin: left center;
-}
-
-.graph-dtmf {
-  position: absolute;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 6px;
 }
 
 .detail-section {
@@ -384,7 +432,7 @@ body {
 }
 
 .status-bar {
-  height: 36px;
+  height: 65px;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -417,6 +465,18 @@ body {
   box-shadow:
     0 0 0 3px rgba(214, 69, 69, 0.2),
     var(--shadow-card);
+}
+
+.list-item.has-warning,
+.graph-node.has-warning {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18), var(--shadow-card);
+}
+
+.validation-warning {
+  color: var(--warning);
+  font-size: 12px;
+  margin-top: 6px;
 }
 
 .validation-error {

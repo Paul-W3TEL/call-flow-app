@@ -623,7 +623,22 @@ Résultat attendu :
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.13 Validation manuelle
+### 5.13 DTMF dupliquée
+
+**Objectif** - Vérifier qu'une destination dupliquée est détectée.
+
+Action :
+
+- donner la même destination sur deux DTMF
+
+Résultat attendu :
+
+- le noeud concerné affiche un indicateur d'alerte
+- l’élément sidebar correspondant affiche un indicateur d’alerte
+- le Detail Panel affiche une alerte de validation
+- `Apply to EZVMS` n'est pas bloqué
+
+### 5.14 Validation manuelle
 
 **Objectif** - Vérifier le bouton `Validate`.
 
@@ -643,7 +658,7 @@ Résultat attendu si invalide :
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.14 Refresh des données locales
+### 5.15 Refresh des données locales
 
 **Objectif** - Vérifier que le bouton `Refresh` annule les modifications locales.
 
@@ -659,7 +674,7 @@ Résultat attendu :
 - les erreurs disparaissent
 - aucune sélection n’est active
 
-### 5.15 Application vers EZVMS
+### 5.16 Application vers EZVMS
 
 **Objectif** - Vérifier que l’application demande confirmation et bloque les erreurs.
 

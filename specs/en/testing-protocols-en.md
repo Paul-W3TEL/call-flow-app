@@ -623,7 +623,22 @@ Expected result:
 - the Detail Panem show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.13 Manual validation
+### 5.13 Duplicated DTMF
+
+**Goal** - Check if a duplicate destination is detected
+
+Action :
+
+- give the same destination on two DTMF
+
+Expected result:
+
+- the node displays an alert indicator
+- the associated sidebar element displays an alert indicator
+- the Detail Panem show a validation alert
+- `Apply to EZVMS` is not blocked
+
+### 5.14 Manual validation
 
 **Goal** - Check the `Validate` button
 
@@ -643,7 +658,7 @@ Expected result if invalid
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.14 Local data refresh
+### 5.15 Local data refresh
 
 **Goal** - Check if the `Refresh` button cancels all local modifications
 
@@ -659,7 +674,7 @@ Expected result:
 - errors disappear
 - no selection is active
 
-### 5.15 Application to EZVMS
+### 5.16 Application to EZVMS
 
 **Goal** - Check if the application asks for confirmation and blocks errors
 
@@ -667,7 +682,7 @@ Valid case:
 
 - make a valid modification
 - click `Apply to EZVMS`
-- confir
+- confirm
 
 Expected result:
 

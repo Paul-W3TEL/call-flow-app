@@ -137,39 +137,6 @@ const callFlow = {
       }
     },
     {
-      "id": "technical_support_transfer",
-      "type": "transfer",
-      "label": "Transfer to technical support",
-      "prompt": "tech_support.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "priority_support_transfer",
-      "type": "transfer",
-      "label": "Transfer to priority outage support",
-      "prompt": "priority_support.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "order_status_transfer",
-      "type": "transfer",
-      "label": "Transfer to order status team",
-      "prompt": "order_status.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
       "id": "operator_transfer",
       "type": "transfer",
       "label": "Transfer to reception",

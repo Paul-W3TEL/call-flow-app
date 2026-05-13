@@ -574,7 +574,7 @@ Expected result:
 
 - the node displays an error indicator
 - the associated sidebar element displays an error indicator
-- the Detail Panem show a validation error
+- the Detail Panel show a validation error
 - `Apply to EZVMS` is blocked
 
 ### 5.10 Incoherent modification
@@ -591,7 +591,7 @@ Expected result:
 
 - the node displays an alert indicator
 - the associated sidebar element displays an alert indicator
-- the Detail Panem show a validation alert
+- the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
 ### 5.11 Valid DTMF modification
@@ -620,7 +620,7 @@ Expected result:
 
 - the node displays an error indicator
 - the associated sidebar element displays an error indicator
-- the Detail Panem show a validation error
+- the Detail Panel show a validation error
 - `Apply to EZVMS` is blocked
 
 ### 5.13 Duplicated DTMF
@@ -635,7 +635,7 @@ Expected result:
 
 - the node displays an alert indicator
 - the associated sidebar element displays an alert indicator
-- the Detail Panem show a validation alert
+- the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
 ### 5.14 Manual validation
@@ -652,7 +652,13 @@ Expected result is valid:
 Validation passed.
 ```
 
-Expected result if invalid
+Expected result if warnings:
+
+```txt
+Validation passed, but warnings have been found. Check highlighted blocks.
+```
+
+Expected result if errors:
 
 ```txt
 Validation failed. Check highlighted blocks.
@@ -682,6 +688,13 @@ Valid case:
 
 - make a valid modification
 - click `Apply to EZVMS`
+
+Expected result:
+
+```txt
+Apply changes to EZVMS?
+```
+
 - confirm
 
 Expected result:
@@ -690,7 +703,26 @@ Expected result:
 Modifications have been sent!
 ```
 
-Invalid case:
+Warning case:
+
+- make a modification that raises a warning
+- click `Apply to EZVMS`
+
+Expected result:
+
+```txt
+Validation has found warnings that may block the application. Apply changes to EZVMS?
+```
+
+- confirm
+
+Expected result:
+
+```txt
+Modifications have been sent!
+```
+
+Error case:
 
 - create an error
 - click `Apply to EZVMS`
@@ -700,7 +732,5 @@ Expected result:
 ```txt
 Cannot apply: blocking validation errors exist.
 ```
-
-No application can be simulated if the validation is invalid
 
 ------

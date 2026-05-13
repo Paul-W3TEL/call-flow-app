@@ -652,7 +652,13 @@ Résultat attendu si valide :
 Validation passed.
 ```
 
-Résultat attendu si invalide :
+Résultat attendu si alerte :
+
+```txt
+Validation passed, but warnings have been found. Check highlighted blocks.
+```
+
+Résultat attendu si erreur :
 
 ```txt
 Validation failed. Check highlighted blocks.
@@ -682,6 +688,13 @@ Cas valide :
 
 - effectuer une modification valide
 - cliquer sur `Apply to EZVMS`
+
+Résultat attendu :
+
+```txt
+Apply changes to EZVMS?
+```
+
 - confirmer
 
 Résultat attendu :
@@ -690,7 +703,26 @@ Résultat attendu :
 Modifications have been sent!
 ```
 
-Cas invalide :
+Cas alerte :
+
+- effectuer une modification qui lève une alerte
+- cliquer sur `Apply to EZVMS`
+
+Résultat attendu :
+
+```txt
+Validation has found warnings that may block the application. Apply changes to EZVMS?
+```
+
+- confirmer
+
+Résultat attendu :
+
+```txt
+Modifications have been sent!
+```
+
+Cas erreur :
 
 - créer une erreur
 - cliquer sur `Apply to EZVMS`
@@ -700,7 +732,5 @@ Résultat attendu :
 ```txt
 Cannot apply: blocking validation errors exist.
 ```
-
-Aucune application ne doit être simulée si la validation est invalide.
 
 ------

@@ -109,7 +109,8 @@ The backend is responsible for:
 
 ## Frontend
 
-The frontend provides a modern, interactive interface built with the Diamy UI design language
+The frontend is a modern, interactive Single Page Application (SPA) built with the Diamy UI design language.
+It provides a visual abstraction layer that allows users to understand and manage complex Call Flows without needing to navigate the underlying EZVMS SOAP complexity.
 
 - graph visualisation
 - node interaction
@@ -125,8 +126,6 @@ The frontend provides a modern, interactive interface built with the Diamy UI de
 - contextual panel that displays technical parameters for the selected node
 - integrated status bar and chips indicating the current validity and synchronization state
 - currently uses a local representation of the internal JSON model for testing visual states and UI logic.
-
-The frontend will provide:
 
 ---
 
@@ -161,10 +160,8 @@ This model acts as the canonical application structure.
 
 ## Planned Features
 
+- Better graph visualisation
 - Live API Integration
-- Controlled Editing
-- Action Management
-- Real-time Validation
 - EZVMS synchronization
 - Multi-language Support
 
@@ -174,9 +171,9 @@ This model acts as the canonical application structure.
 
 Current work focuses on:
 
+- Better Frontend visuals
 - Frontend/Backend Connection
-- Editing Logic
-- Validation UI
+- Backend communication with EZVMS
 
 ---
 

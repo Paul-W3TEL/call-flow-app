@@ -5,115 +5,244 @@
 */
 
 const callFlow = {
-  company: {
-    company_id: "1001",
-    name: "Example Company",
+  "company": {
+    "company_id": "acme-fr-001",
+    "name": "Acme Services France"
   },
-  entry_point: {
-    pilot_number: "0123456789",
-    start_node_id: "menu_1",
+  "entry_point": {
+    "pilot_number": "+33186260000",
+    "start_node_id": "main_menu"
   },
-  nodes: [
+  "nodes": [
     {
-      id: "menu_1",
-      type: "menu",
-      label: "Main Menu",
-      prompt: "welcome.wav",
-      dtmf: {
-        1: "menu_2",
-        2: "playback_1",
-        3: "transfer_1",
-        9: "hangup"
+      "id": "main_menu",
+      "type": "menu",
+      "label": "Main welcome menu",
+      "prompt": "welcome.wav",
+      "dtmf": {
+        "1": "sales_menu",
+        "2": "support_menu",
+        "3": "billing_transfer",
+        "4": "info_playback",
+        "9": "operator_transfer"
       },
-      settings: {
-        timeout: 5,
-        retries: 3,
-      },
+      "settings": {
+        "timeout": 8,
+        "retries": 2
+      }
     },
     {
-      id: "playback_1",
-      type: "playback",
-      label: "External transfer",
-      prompt: "external.wav",
-      dtmf: {
-        1: "external_1",
-        9: "menu_1"
+      "id": "sales_menu",
+      "type": "menu",
+      "label": "Sales department menu",
+      "prompt": "sales_menu.wav",
+      "dtmf": {
+        "1": "new_sales_transfer",
+        "2": "renewals_transfer",
+        "3": "partner_transfer",
+        "0": "main_menu"
       },
-      settings: {
-        timeout: 5,
-        retries: 3,
-      },
+      "settings": {
+        "timeout": 7,
+        "retries": 2
+      }
     },
     {
-      id: "transfer_1",
-      type: "transfer",
-      label: "Transfer to voicemail",
-      prompt: "voicemail.wav",
-      dtmf: {
-        1: "voicemail_1",
-        9: "menu_1",
+      "id": "support_menu",
+      "type": "menu",
+      "label": "Customer support menu",
+      "prompt": "support_menu.wav",
+      "dtmf": {
+        "1": "outage_notice",
+        "2": "technical_support_transfer",
+        "3": "order_status_transfer",
+        "0": "main_menu"
       },
-      settings: {
-        timeout: 5,
-        retries: 3,
-      },
+      "settings": {
+        "timeout": 7,
+        "retries": 2
+      }
     },
     {
-      id: "menu_2",
-      type: "menu",
-      label: "Choose your correspondant",
-      prompt: "choice.wav",
-      dtmf: {
-        1: "hr",
-        2: "comptability",
-        3: "production",
-        9: "menu_1"
+      "id": "outage_notice",
+      "type": "playback",
+      "label": "Service outage advisory",
+      "prompt": "outage_notice.wav",
+      "dtmf": {
+        "1": "priority_support_transfer",
+        "2": "outage_voicemail",
+        "0": "support_menu"
       },
-      settings: {
-        timeout: 5,
-        retries: 3,
-      },
+      "settings": {
+        "timeout": 6,
+        "retries": 1
+      }
     },
+    {
+      "id": "info_playback",
+      "type": "playback",
+      "label": "Opening hours and address",
+      "prompt": "info.wav",
+      "dtmf": {
+        "0": "main_menu",
+        "1": "operator_transfer"
+      },
+      "settings": {
+        "timeout": 10,
+        "retries": 1
+      }
+    },
+    {
+      "id": "billing_transfer",
+      "type": "transfer",
+      "label": "Transfer to billing",
+      "prompt": "billing.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "new_sales_transfer",
+      "type": "transfer",
+      "label": "Transfer to new sales",
+      "prompt": "new_sales.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "renewals_transfer",
+      "type": "transfer",
+      "label": "Transfer to renewals",
+      "prompt": "renewals.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "partner_transfer",
+      "type": "transfer",
+      "label": "Transfer to partnerships",
+      "prompt": "partner.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "technical_support_transfer",
+      "type": "transfer",
+      "label": "Transfer to technical support",
+      "prompt": "tech_support.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "priority_support_transfer",
+      "type": "transfer",
+      "label": "Transfer to priority outage support",
+      "prompt": "priority_support.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "order_status_transfer",
+      "type": "transfer",
+      "label": "Transfer to order status team",
+      "prompt": "order_status.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    },
+    {
+      "id": "operator_transfer",
+      "type": "transfer",
+      "label": "Transfer to reception",
+      "prompt": "operator.wav",
+      "dtmf": {},
+      "settings": {
+        "timeout": 5,
+        "retries": 1
+      }
+    }
   ],
-  targets: [
+  "targets": [
     {
-      id: "hr",
-      type: "extension",
-      label: "Human Ressources",
-      number: "1000",
+      "id": "billing_transfer",
+      "type": "extension",
+      "label": "Billing Queue",
+      "number": "2300"
     },
     {
-      id: "comptability",
-      type: "extension",
-      label: "Comptability",
-      number: "1001",
+      "id": "new_sales_transfer",
+      "type": "extension",
+      "label": "New Sales Queue",
+      "number": "2100"
     },
     {
-      id: "production",
-      type: "extension",
-      label: "Production",
-      number: "1002",
+      "id": "renewals_transfer",
+      "type": "extension",
+      "label": "Renewals Queue",
+      "number": "2110"
     },
     {
-      id: "voicemail_1",
-      type: "voicemail",
-      label: "Voicemail",
-      number: "1003",
+      "id": "partner_transfer",
+      "type": "extension",
+      "label": "Partnerships Queue",
+      "number": "2120"
     },
     {
-      id: "external_1",
-      type: "external_number",
-      label: "External partner",
-      number: "1004",
+      "id": "technical_support_transfer",
+      "type": "extension",
+      "label": "Technical Support Queue",
+      "number": "2200"
     },
     {
-      id: "hangup",
-      type: "hangup",
-      label: "End of call",
-      number: "1005",
+      "id": "priority_support_transfer",
+      "type": "extension",
+      "label": "Priority Outage Queue",
+      "number": "2299"
     },
+    {
+      "id": "order_status_transfer",
+      "type": "extension",
+      "label": "Order Status Queue",
+      "number": "2210"
+    },
+    {
+      "id": "operator_transfer",
+      "type": "extension",
+      "label": "Reception",
+      "number": "2000"
+    },
+    {
+      "id": "outage_voicemail",
+      "type": "voicemail",
+      "label": "Outage Voicemail Box",
+      "number": "vm-2299"
+    }
   ],
-};
+  "validation": {
+    "status": "valid",
+    "errors": [],
+    "warnings": []
+  }
+}
 
 const originalCallFlow = structuredClone(callFlow);
 
@@ -200,60 +329,25 @@ function renderGraph() {
   const nodes = callFlow.nodes;
   const targets = callFlow.targets;
 
-  const nodeWidth = 210;
-  const nodeHeight = 110;
-  const columnGap = 300;
-  const rowGap = 150;
-
-  const entryX = 40;
-  const nodeX = entryX + columnGap;
-  const targetX = nodeX + columnGap * 2;
-
-  const maxRows = Math.max(nodes.length, targets.length, 1);
-  const canvasHeight = Math.max(700, maxRows * rowGap + 160);
-  const canvasWidth = Math.max(1100, targetX + nodeWidth + 120);
-
-  canvas.style.height = `${canvasHeight}px`;
-  canvas.style.minWidth = `${canvasWidth}px`;
-
-  const positions = {};
-
-  positions.entry_point = {
-    x: entryX,
-    y: canvasHeight / 2 - nodeHeight / 2
-  };
-
-  nodes.forEach((node, index) => {
-    positions[node.id] = {
-      x: nodeX,
-      y: 80 + index * rowGap
-    };
-  });
-
-  targets.forEach((target, index) => {
-    positions[target.id] = {
-      x: targetX,
-      y: 80 + index * rowGap
-    };
-  });
-
-  const allObjects = {
-    entry_point: callFlow.entry_point,
-    ...Object.fromEntries(nodes.map((node) => [node.id, node])),
-    ...Object.fromEntries(targets.map((target) => [target.id, target]))
-  };
+  const allIds = new Set([
+    "entry_point",
+    ...nodes.map((node) => node.id),
+    ...targets.map((target) => target.id)
+  ]);
 
   const links = [];
 
-  links.push({
-    from: "entry_point",
-    to: callFlow.entry_point.start_node_id,
-    label: "start"
-  });
+  if (allIds.has(callFlow.entry_point.start_node_id)) {
+    links.push({
+      from: "entry_point",
+      to: callFlow.entry_point.start_node_id,
+      label: "start"
+    });
+  }
 
   nodes.forEach((node) => {
     Object.entries(node.dtmf || {}).forEach(([key, destinationId]) => {
-      if (!allObjects[destinationId]) return;
+      if (!allIds.has(destinationId)) return;
 
       links.push({
         from: node.id,
@@ -262,6 +356,14 @@ function renderGraph() {
       });
     });
   });
+
+  const positions = computeGraphLayout(nodes, targets, links);
+
+  const maxX = Math.max(...Object.values(positions).map((p) => p.x));
+  const maxY = Math.max(...Object.values(positions).map((p) => p.y));
+
+  canvas.style.height = `${maxY + 220}px`;
+  canvas.style.minWidth = `${maxX + 320}px`;
 
   canvas.innerHTML = `
     ${links.map((link, index) => {
@@ -275,8 +377,8 @@ function renderGraph() {
         from.y,
         to.x,
         to.y,
-        nodeWidth,
-        nodeHeight,
+        210,
+        110,
         link.label,
         index
       );
@@ -327,6 +429,61 @@ function renderGraph() {
       </div>
     `).join("")}
   `;
+}
+
+function computeGraphLayout(nodes, targets, links) {
+  const g = new dagre.graphlib.Graph();
+
+  g.setGraph({
+    rankdir: "LR",
+    nodesep: 90,
+    ranksep: 170,
+    marginx: 40,
+    marginy: 40
+  });
+
+  g.setDefaultEdgeLabel(() => ({}));
+
+  const nodeWidth = 210;
+  const nodeHeight = 110;
+
+  g.setNode("entry_point", {
+    width: nodeWidth,
+    height: nodeHeight
+  });
+
+  nodes.forEach((node) => {
+    g.setNode(node.id, {
+      width: nodeWidth,
+      height: nodeHeight
+    });
+  });
+
+  targets.forEach((target) => {
+    g.setNode(target.id, {
+      width: nodeWidth,
+      height: nodeHeight
+    });
+  });
+
+  links.forEach((link) => {
+    g.setEdge(link.from, link.to);
+  });
+
+  dagre.layout(g);
+
+  const positions = {};
+
+  g.nodes().forEach((id) => {
+    const layoutNode = g.node(id);
+
+    positions[id] = {
+      x: layoutNode.x - nodeWidth / 2,
+      y: layoutNode.y - nodeHeight / 2
+    };
+  });
+
+  return positions;
 }
 
 function renderDetails() {
@@ -582,7 +739,6 @@ function refreshData() {
   selectedId = null;
 
   render();
-  alert("Local mock data refreshed.");
 }
 
 function runManualValidation() {
@@ -870,7 +1026,13 @@ function drawSmartLink(fromX, fromY, toX, toY, width, height, label, index) {
   const labelY = startY + (endY - startY) / 2 - 12;
 
   return `
-    <svg class="graph-link-layer">
+    <svg
+      class="graph-link-layer"
+      style="
+        width: ${Math.max(startX, endX) + 400}px;
+        height: ${Math.max(startY, endY) + 400}px;
+      "
+    >
       <path
         d="${path}"
         class="graph-link-path"

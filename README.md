@@ -95,7 +95,7 @@ All specifications are written in Markdown.
 - Endpoints for recovery, validation and update of Call Flows
 - Currently uses static data
 
-Frontend
+### Frontend
 
 - Interface connected to the backend internal API
 - Uses the given JSON model to generate a graphe and detail panels

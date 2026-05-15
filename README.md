@@ -87,45 +87,20 @@ All specifications are written in Markdown.
 
 ---
 
-## Backend
+## Current Project State
 
-The backend is responsible for:
+### Backend
 
-- communicating with EZVMS SOAP services
-- parsing XML responses
-- reconstructing Call Flow graphs
-- mapping SOAP structures into internal models
-- validating Call Flow consistency
-- exposing a clean JSON API
+- Operationnal JSON API, asbtracting SOAP complexity
+- Endpoints for recovery, validation and update of Call Flows
+- Currently uses static data
 
-### Current Backend State
+Frontend
 
-- JSON definition of endpoints, methods, and error codes
-- Functional Express server for health checks
-- Initial structures for companies, entry points, nodes, and targets
-- Mapping definitions for SOAP-to-JSON conversion, UI exposure permissions, and validation rules
-
----
-
-## Frontend
-
-The frontend is a modern, interactive Single Page Application (SPA) built with the Diamy UI design language.
-It provides a visual abstraction layer that allows users to understand and manage complex Call Flows without needing to navigate the underlying EZVMS SOAP complexity.
-
-- graph visualisation
-- node interaction
-- detail panels
-- validation feedback
-- controlled editing features
-- Diamy UI integration
-
-### Current Frontend State
-
-- dynamic "Graph Canvas" that renders Call Flow nodes and their DTMF transitions
-- synchronized sidebar and canvas that highlight nodes on hover and selection
-- contextual panel that displays technical parameters for the selected node
-- integrated status bar and chips indicating the current validity and synchronization state
-- currently uses a local representation of the internal JSON model for testing visual states and UI logic.
+- Interface connected to the backend internal API
+- Uses the given JSON model to generate a graphe and detail panels
+- Dynamic display of nodes, selection states, hover states and validation infos in real time
+- Modification of prompts and nodes parameters
 
 ---
 
@@ -158,22 +133,21 @@ This model acts as the canonical application structure.
 
 ---
 
+## Current Project Phase
+
+Current work focuses on:
+
+- Better Frontend visuals
+- Backend communication with EZVMS
+
+---
+
 ## Planned Features
 
 - Better graph visualisation
 - Live API Integration
 - EZVMS synchronization
 - Multi-language Support
-
----
-
-## Current Project Phase
-
-Current work focuses on:
-
-- Better Frontend visuals
-- Frontend/Backend Connection
-- Backend communication with EZVMS
 
 ---
 

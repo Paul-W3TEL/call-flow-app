@@ -207,7 +207,27 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.4 Récupération d’un Call Flow valide
+### 4.4 Lister les Call Flow
+
+**Objectif** - Vérifier que les Call Flows du serveur sont accessibles.
+
+URL navigateur
+
+```txt
+http://IP_SERVEUR:3000/api/call-flows
+```
+
+Réponse attendue
+
+Liste de Call Flow récupéré depui EZVMS
+
+Statut attendu
+
+```txt
+HTTP 200
+```
+
+### 4.5 Récupération d’un Call Flow valide
 
 **Objectif** - Vérifier que l’API retourne les données d'exemple du Call Flow.
 
@@ -244,7 +264,7 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.5 Récupération d’un Call Flow inexistant
+### 4.6 Récupération d’un Call Flow inexistant
 
 **Objectif** - Vérifier que l’API retourne une erreur si l’identifiant société et/ou le numéro pilote est incorrect.
 
@@ -274,7 +294,7 @@ Statut attendu
 HTTP 404
 ```
 
-### 4.6 Validation d’un Call Flow
+### 4.7 Validation d’un Call Flow
 
 **Objectif** - Vérifier que l’endpoint de validation répond.
 
@@ -302,7 +322,7 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.7 Mise à jour d’un noeud d'exemple
+### 4.8 Mise à jour d’un noeud d'exemple
 
 **Objectif** - Vérifier que l’API accepte une modification autorisée en mode brouillon.
 
@@ -337,7 +357,7 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.8 Tentative de modification d’un champ interdit
+### 4.9 Tentative de modification d’un champ interdit
 
 **Objectif** - Vérifier que l’API refuse la modification d’un champ non éditable.
 
@@ -363,7 +383,7 @@ Statut attendu
 HTTP 400
 ```
 
-### 4.9 Application d'exemple vers EZVMS
+### 4.10 Application d'exemple vers EZVMS
 
 **Objectif** - Vérifier que l’endpoint d’application demande une confirmation.
 

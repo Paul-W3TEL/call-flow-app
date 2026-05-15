@@ -207,7 +207,28 @@ Expected status
 HTTP 200
 ```
 
-### 4.4 Fetching of a valid Call Flow
+### 4.4 Listing Call Flows
+
+**Goal** - Check if the API contract is accessible
+
+Navigator URL
+
+```txt
+http://IP_SERVEUR:3000/api/call-flows
+```
+
+Expected answer
+
+List of fetched Call Flows from EZVMS
+
+Expected status
+
+```txt
+HTTP 200
+```
+
+
+### 4.5 Fetching of a valid Call Flow
 
 **Goal** - Check if the API returns the example Call Flow data
 
@@ -244,7 +265,7 @@ Expected status
 HTTP 200
 ```
 
-### 4.5 Fetching of an invalid Call Flow
+### 4.6 Fetching of an invalid Call Flow
 
 **Goal** - Check if the API returns an error if the company ID and/or the pilot number is incorrect
 
@@ -274,7 +295,7 @@ Expected status
 HTTP 404
 ```
 
-### 4.6 Validation of a Call Flow
+### 4.7 Validation of a Call Flow
 
 **Goal** - Check if the validation endpoint replies
 
@@ -302,7 +323,7 @@ Expected status
 HTTP 200
 ```
 
-### 4.7 Updating an example node
+### 4.8 Updating an example node
 
 **Goal** - Check if the API allows for a draft modification
 
@@ -337,7 +358,7 @@ Expected status
 HTTP 200
 ```
 
-### 4.8 Attempted modification of a read-only field
+### 4.9 Attempted modification of a read-only field
 
 **Goal** - Vérifier que l’API refuse la modification d’un champ non éditable. / Check if the API refuses the modification of a read-only field
 
@@ -363,7 +384,7 @@ Expected status
 HTTP 400
 ```
 
-### 4.9 Example application to EZVMS
+### 4.10 Example application to EZVMS
 
 **Goal** - Check if the application endpoint requires a confirmation
 

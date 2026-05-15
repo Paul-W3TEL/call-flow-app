@@ -1,217 +1,10 @@
-/*
-    This interface does not yet communicate with the backend API
-    We instead have declared a local call flow, that could be the result of an API call
-    The next step will be to fetch API data, and turn them into this table to display
-*/
 
-const callFlow = {
-  "company": {
-    "company_id": "acme-fr-001",
-    "name": "Acme Services France"
-  },
-  "entry_point": {
-    "pilot_number": "+33186260000",
-    "start_node_id": "main_menu"
-  },
-  "nodes": [
-    {
-      "id": "main_menu",
-      "type": "menu",
-      "label": "Main welcome menu",
-      "prompt": "welcome.wav",
-      "dtmf": {
-        "1": "sales_menu",
-        "2": "support_menu",
-        "3": "billing_transfer",
-        "4": "info_playback",
-        "9": "operator_transfer"
-      },
-      "settings": {
-        "timeout": 8,
-        "retries": 2
-      }
-    },
-    {
-      "id": "sales_menu",
-      "type": "menu",
-      "label": "Sales department menu",
-      "prompt": "sales_menu.wav",
-      "dtmf": {
-        "1": "new_sales_transfer",
-        "2": "renewals_transfer",
-        "3": "partner_transfer",
-        "0": "main_menu"
-      },
-      "settings": {
-        "timeout": 7,
-        "retries": 2
-      }
-    },
-    {
-      "id": "support_menu",
-      "type": "menu",
-      "label": "Customer support menu",
-      "prompt": "support_menu.wav",
-      "dtmf": {
-        "1": "outage_notice",
-        "2": "technical_support_transfer",
-        "3": "order_status_transfer",
-        "0": "main_menu"
-      },
-      "settings": {
-        "timeout": 7,
-        "retries": 2
-      }
-    },
-    {
-      "id": "outage_notice",
-      "type": "playback",
-      "label": "Service outage advisory",
-      "prompt": "outage_notice.wav",
-      "dtmf": {
-        "1": "priority_support_transfer",
-        "2": "outage_voicemail",
-        "0": "support_menu"
-      },
-      "settings": {
-        "timeout": 6,
-        "retries": 1
-      }
-    },
-    {
-      "id": "info_playback",
-      "type": "playback",
-      "label": "Opening hours and address",
-      "prompt": "info.wav",
-      "dtmf": {
-        "0": "main_menu",
-        "1": "operator_transfer"
-      },
-      "settings": {
-        "timeout": 10,
-        "retries": 1
-      }
-    },
-    {
-      "id": "billing_transfer",
-      "type": "transfer",
-      "label": "Transfer to billing",
-      "prompt": "billing.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "new_sales_transfer",
-      "type": "transfer",
-      "label": "Transfer to new sales",
-      "prompt": "new_sales.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "renewals_transfer",
-      "type": "transfer",
-      "label": "Transfer to renewals",
-      "prompt": "renewals.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "partner_transfer",
-      "type": "transfer",
-      "label": "Transfer to partnerships",
-      "prompt": "partner.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    },
-    {
-      "id": "operator_transfer",
-      "type": "transfer",
-      "label": "Transfer to reception",
-      "prompt": "operator.wav",
-      "dtmf": {},
-      "settings": {
-        "timeout": 5,
-        "retries": 1
-      }
-    }
-  ],
-  "targets": [
-    {
-      "id": "billing_transfer",
-      "type": "extension",
-      "label": "Billing Queue",
-      "number": "2300"
-    },
-    {
-      "id": "new_sales_transfer",
-      "type": "extension",
-      "label": "New Sales Queue",
-      "number": "2100"
-    },
-    {
-      "id": "renewals_transfer",
-      "type": "extension",
-      "label": "Renewals Queue",
-      "number": "2110"
-    },
-    {
-      "id": "partner_transfer",
-      "type": "extension",
-      "label": "Partnerships Queue",
-      "number": "2120"
-    },
-    {
-      "id": "technical_support_transfer",
-      "type": "extension",
-      "label": "Technical Support Queue",
-      "number": "2200"
-    },
-    {
-      "id": "priority_support_transfer",
-      "type": "extension",
-      "label": "Priority Outage Queue",
-      "number": "2299"
-    },
-    {
-      "id": "order_status_transfer",
-      "type": "extension",
-      "label": "Order Status Queue",
-      "number": "2210"
-    },
-    {
-      "id": "operator_transfer",
-      "type": "extension",
-      "label": "Reception",
-      "number": "2000"
-    },
-    {
-      "id": "outage_voicemail",
-      "type": "voicemail",
-      "label": "Outage Voicemail Box",
-      "number": "vm-2299"
-    }
-  ],
-  "validation": {
-    "status": "valid",
-    "errors": [],
-    "warnings": []
-  }
-}
+const API_BASE_URL = "http://172.16.100.251:3000";
+const DEFAULT_COMPANY_ID = "1001";
+const DEFAULT_PILOT_NUMBER = "0123456789";
 
-const originalCallFlow = structuredClone(callFlow);
+let callFlow = null;
+let originalCallFlow = null;
 
 let validationState = {
   status: "valid",
@@ -226,7 +19,9 @@ let hoveredType = null;
 let hoveredId = null;
 
 function render() {
+  if (!callFlow) return;
   validateCallFlow();
+
   document.getElementById("companyName").textContent = callFlow.company.name;
   document.getElementById("pilotNumber").textContent =
     callFlow.entry_point.pilot_number;
@@ -688,24 +483,16 @@ function updatePromptFile(nodeId, file) {
   validateCallFlow();
   render();
 }
-
-function refreshData() {
-  const confirmed = confirm("Refresh data? Local modifications will be lost.");
+async function refreshData() {
+  const confirmed = confirm(
+    "Refresh data from backend? Local modifications will be lost."
+  );
 
   if (!confirmed) return;
 
-  Object.assign(callFlow, structuredClone(originalCallFlow));
+  await loadCallFlow();
 
-  validationState = {
-    status: "valid",
-    errors: [],
-    warnings: [],
-  };
-
-  selectedType = null;
-  selectedId = null;
-
-  render();
+  alert("Data refreshed from backend.");
 }
 
 function runManualValidation() {
@@ -1034,4 +821,58 @@ function graphTypeClass(itemType, objectType) {
   return "type-unknown";
 }
 
-render();
+async function loadCallFlow() {
+  const graphCanvas = document.getElementById("graphCanvas");
+  const detailContent = document.getElementById("detailContent");
+
+  graphCanvas.innerHTML = `
+    <div class="detail-section">
+      <div class="panel-title">Loading Call Flow...</div>
+      <div class="helper">Fetching data from backend API.</div>
+    </div>
+  `;
+
+  detailContent.innerHTML = `
+    <div class="detail-section">
+      <div class="panel-title">Waiting for data</div>
+      <div class="helper">The Call Flow is being loaded.</div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/call-flows/${DEFAULT_COMPANY_ID}/${DEFAULT_PILOT_NUMBER}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`API returned HTTP ${response.status}`);
+    }
+
+    callFlow = await response.json();
+    originalCallFlow = structuredClone(callFlow);
+
+    selectedType = null;
+    selectedId = null;
+
+    validateCallFlow();
+    render();
+  } catch (error) {
+    graphCanvas.innerHTML = `
+      <div class="detail-section">
+        <div class="panel-title">API loading error</div>
+        <div class="validation-error">${error.message}</div>
+      </div>
+    `;
+
+    detailContent.innerHTML = `
+      <div class="detail-section">
+        <div class="panel-title">Unable to load Call Flow</div>
+        <div class="helper">
+          Check that the backend server is running and reachable.
+        </div>
+      </div>
+    `;
+  }
+}
+
+loadCallFlow()

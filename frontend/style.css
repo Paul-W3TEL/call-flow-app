@@ -290,6 +290,7 @@ body {
   border-color: var(--warning) !important;
   box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18), var(--shadow-card) !important;
 }
+<<<<<<< HEAD
 
 .selection-page {
   height: 100vh;
@@ -315,3 +316,5 @@ body {
   align-items: center;
   justify-content: center;
 }
+=======
+>>>>>>> parent of 7944986 (Ajouté un écran de sélection, pour choisir quel Call Flow afficher)

@@ -425,9 +425,9 @@ Expected answer
 
 ## 5. Frontend testing protocols
 
-### 5.1 Opening the example frontend
+### 5.1 Opening the frontend (Selection screen)
 
-**Goal** - Check if the example frontend opens correctly
+**Goal** - Check if the interface opens on available Call Flow list
 
 From the local post, open:
 
@@ -437,27 +437,40 @@ frontend/index.html
 
 Expected result:
 
-- the Diamy header is visible
-- the sidebar is visible
-- the Graph Canvas is visible
-- the Detail Panel is visible
-- The status bar is visible
+- the selection screen is visible
+- the title "Select a Call Flow" is displayed
+- the available list is loaded from the API
+- Each card shows its label, the company name and the pilot number
 
-Possible errors:
+### 5.2 Loading a Call Flow
 
-```txt
-blank page
-styles not loaded
-script not loaded
-```
+**Goal** - Check if selecting a call flow switches to the editor
 
-Possible actions:
+Actions :
 
-- check if `index.html`, `styles.css` and `app.js` are all in the same folder
-- open the navigator console
-- check JavaScript errors
+- click on a call flow card in the list
 
-### 5.2 Sidebar selection
+Expected result :
+
+- the screen switches to the editor view
+- data specific to the flow (company name, pilot number) are injected in the header
+- the Graph Canvas displays the flow structure
+
+### 5.3 Back to the selection
+
+**Goal** - Check if the user can leave the editor and come back to the list
+
+Action
+
+- From the editor, click the "Back" button
+
+Expected result :
+
+- the editor interface disapears
+- the selection screen is displayed
+- the previous selection is reinitialised (no element is selected by default if the flow is re-entered)
+
+### 5.4 Sidebar selection
 
 **Goal** - Check if every sidebar element selects the correct blocks
 
@@ -473,7 +486,7 @@ Expected result:
 - the selected element appears in the sidebar using the selection style
 - the corresponding block appears in the graph using the selection style
 
-### 5.3 Graph Canvas Selection 
+### 5.5 Graph Canvas Selection 
 
 **Goal** - Check if graph blocks are interactives
 
@@ -490,7 +503,7 @@ Expected result:
 - le selected block is visually identifiable
 - the corresponding sidebar button is also selected
 
-### 5.4 Synchronised hover
+### 5.6 Synchronised hover
 
 **Goal** - Check if the sidebar and graph hovers are synchronised
 
@@ -509,7 +522,7 @@ Expected result:
 - hovered states disappear when the mouse leaves the element
 - the selected state remains visible after the hover
 
-### 5.5 Unselection
+### 5.7 Unselection
 
 **Goal** - Check if the user can go back to a selectionless state
 
@@ -527,7 +540,7 @@ Expected result:
 Waiting for selection
 ```
 
-### 5.6 Audio prompt modification
+### 5.8 Audio prompt modification
 
 **Goal** - Check if a prompt can be replaced by a valid local file
 
@@ -551,7 +564,7 @@ Formats autorisés :
 .wav
 ```
 
-### 5.7 Invalid audio prompt
+### 5.9 Invalid audio prompt
 
 **Goal** - Check if invalid files are rejected
 
@@ -567,7 +580,7 @@ Invalid prompt file. Allowed formats: MP3, MP4, WAV.
 
 The existing prompt must not be replaced
 
-### 5.8 Simple parameters modification
+### 5.10 Simple parameters modification
 
 **Goal** - Check if editable fields can be modifiable
 
@@ -582,7 +595,7 @@ Expected result:
 - the node switches to a modified state
 - no error is seen as long as entered values are valid
 
-### 5.9 Incorrect modification
+### 5.11 Incorrect modification
 
 **Goal** - Check if entering negative values blocks modifications
 
@@ -598,7 +611,7 @@ Expected result:
 - the Detail Panel show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.10 Incoherent modification
+### 5.12 Incoherent modification
 
 **Goal** - Check if entering incoherent values raises an alert
 
@@ -615,7 +628,7 @@ Expected result:
 - the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
-### 5.11 Valid DTMF modification
+### 5.13 Valid DTMF modification
 
 **Goal** - Check if a DTMF destination can be modified to an existing destination
 
@@ -629,7 +642,7 @@ Expected result:
 - the node switches to a modified state
 - the validation remains valid
 
-### 5.12 Invalid DTMF
+### 5.14 Invalid DTMF
 
 **Goal** - Check if an non-existant destination is detected
 
@@ -644,7 +657,7 @@ Expected result:
 - the Detail Panel show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.13 Duplicated DTMF
+### 5.15 Duplicated DTMF
 
 **Goal** - Check if a duplicate destination is detected
 
@@ -659,7 +672,7 @@ Expected result:
 - the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
-### 5.14 Manual validation
+### 5.16 Manual validation
 
 **Goal** - Check the `Validate` button
 
@@ -685,7 +698,7 @@ Expected result if errors:
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.15 Local data refresh
+### 5.17 Local data refresh
 
 **Goal** - Check if the `Refresh` button cancels all local modifications
 
@@ -701,7 +714,7 @@ Expected result:
 - errors disappear
 - no selection is active
 
-### 5.16 Application to EZVMS
+### 5.18 Application to EZVMS
 
 **Goal** - Check if the application asks for confirmation and blocks errors
 

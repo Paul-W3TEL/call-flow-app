@@ -424,39 +424,52 @@ Réponse attendue
 
 ## 5. Protocoles de tests Frontend
 
-### 5.1 Ouverture du frontend d'exemple
+### 5.1 Ouverture du frontend (Écran de sélection)
 
-**Objectif** - Vérifier que l’interface mock s’ouvre correctement.
+**Objectif** – Vérifier que l’interface s’ouvre sur la liste des Call Flows disponibles.
 
 Depuis le poste local, ouvrir :
 
-```txt
+```text
 frontend/index.html
 ```
 
 Résultat attendu :
 
-- le header Diamy est visible
-- la sidebar est visible
-- le Graph Canvas est visible
-- le Detail Panel est visible
-- la barre de statut est visible
+- L'écran de sélection est visible.
+- Le titre "Select a Call Flow" est présent.
+- La liste des flux disponibles est chargée depuis l'API.
+- Chaque carte de flux affiche le libellé, le nom de l'entreprise et le numéro pilote.
 
-Erreurs possibles :
+### 5.2 Chargement d'un Call Flow
 
-```txt
-page blanche
-styles non chargés
-script non chargé
-```
+**Objectif** – Vérifier que la sélection d'un flux bascule vers l'éditeur.
 
-Actions possibles :
+Actions :
 
-- vérifier que `index.html`, `styles.css` et `app.js` sont dans le même dossier
-- ouvrir la console navigateur
-- vérifier les erreurs JavaScript
+- Cliquer sur une carte de flux dans la liste.
 
-### 5.2 Sélection depuis la sidebar
+Résultat attendu :
+
+- L'affichage bascule vers la vue éditeur.
+- Les données spécifiques au flux (Nom entreprise, Numéro pilote) sont injectées dans le header.
+- Le Graph Canvas affiche la structure du flux.
+
+### 5.3 Retour à la sélection (Back Button)
+
+**Objectif** – Vérifier que l'utilisateur peut quitter l'éditeur pour revenir à la liste.
+
+Action :
+
+- Depuis l'éditeur, cliquer sur le bouton "Back".
+
+Résultat attendu :
+
+- L'interface de l'éditeur disparaît.
+- L'écran de sélection est de nouveau visible.
+- La sélection précédente est réinitialisée (aucun élément sélectionné par défaut si l'on revient dans un flux).
+
+### 5.4 Sélection depuis la sidebar
 
 **Objectif** - Vérifier que les éléments de la sidebar sélectionnent les bons blocs.
 
@@ -472,7 +485,7 @@ Résultat attendu :
 - l’élément sélectionné dans la sidebar utilise le style sélectionné
 - le bloc correspondant dans le graph utilise le style sélectionné
 
-### 5.3 Sélection depuis le Graph Canvas
+### 5.5 Sélection depuis le Graph Canvas
 
 **Objectif** - Vérifier que les blocs du graph sont interactifs.
 
@@ -489,7 +502,7 @@ Résultat attendu :
 - le bloc sélectionné est visuellement identifiable
 - l’élément correspondant dans la sidebar est aussi sélectionné
 
-### 5.4 Survol synchronisé
+### 5.6 Survol synchronisé
 
 **Objectif** - Vérifier que le survol sidebar/graph est synchronisé.
 
@@ -508,7 +521,7 @@ Résultat attendu :
 - l’état de survol disparaît quand la souris quitte l’élément
 - l’état sélectionné reste visible même après le survol
 
-### 5.5 Désélection
+### 5.7 Désélection
 
 **Objectif** - Vérifier que l’utilisateur peut revenir à un état sans sélection.
 
@@ -526,7 +539,7 @@ Résultat attendu :
 Waiting for selection
 ```
 
-### 5.6 Modification du prompt audio
+### 5.8 Modification du prompt audio
 
 **Objectif** - Vérifier qu’un prompt peut être remplacé par un fichier local autorisé.
 
@@ -550,7 +563,7 @@ Formats autorisés :
 .wav
 ```
 
-### 5.7 Refus d’un prompt invalide
+### 5.9 Refus d’un prompt invalide
 
 **Objectif** - Vérifier que les fichiers non autorisés sont refusés.
 
@@ -566,7 +579,7 @@ Invalid prompt file. Allowed formats: MP3, MP4, WAV.
 
 Le prompt existant ne doit pas être remplacé.
 
-### 5.8 Modification des paramètres simples
+### 5.10 Modification des paramètres simples
 
 **Objectif** - Vérifier que les champs éditables peuvent être modifiés.
 
@@ -581,7 +594,7 @@ Résultat attendu :
 - le noeud passe en état modifié
 - aucune erreur n’apparaît si les valeurs restent valides
 
-### 5.9 Modification incorrect
+### 5.11 Modification incorrect
 
 **Objectif** - Vérifier qu'entrer des valeurs négatives bloque la validation
 
@@ -597,7 +610,7 @@ Résultat attendu :
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.10 Modification incohérente
+### 5.12 Modification incohérente
 
 **Objectif** - Vérifier qu'entrer des valeurs incohérente lève une alerte
 
@@ -614,7 +627,7 @@ Résultat attendu :
 - le Detail Panel affiche une alerte de validation
 - `Apply to EZVMS` n'est pas bloqué
 
-### 5.11 Modification DTMF valide
+### 5.13 Modification DTMF valide
 
 **Objectif** - Vérifier qu’une destination DTMF peut être modifiée vers une destination existante.
 
@@ -628,7 +641,7 @@ Résultat attendu :
 - le noeud passe en état modifié
 - la validation reste valide
 
-### 5.12 Erreur DTMF invalide
+### 5.14 Erreur DTMF invalide
 
 **Objectif** - Vérifier qu’une destination inexistante est détectée.
 
@@ -643,7 +656,7 @@ Résultat attendu :
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.13 DTMF dupliquée
+### 5.15 DTMF dupliquée
 
 **Objectif** - Vérifier qu'une destination dupliquée est détectée.
 
@@ -658,7 +671,7 @@ Résultat attendu :
 - le Detail Panel affiche une alerte de validation
 - `Apply to EZVMS` n'est pas bloqué
 
-### 5.14 Validation manuelle
+### 5.16 Validation manuelle
 
 **Objectif** - Vérifier le bouton `Validate`.
 
@@ -684,7 +697,7 @@ Résultat attendu si erreur :
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.15 Refresh des données locales
+### 5.17 Refresh des données locales
 
 **Objectif** - Vérifier que le bouton `Refresh` annule les modifications locales.
 
@@ -700,7 +713,7 @@ Résultat attendu :
 - les erreurs disparaissent
 - aucune sélection n’est active
 
-### 5.16 Application vers EZVMS
+### 5.18 Application vers EZVMS
 
 **Objectif** - Vérifier que l’application demande confirmation et bloque les erreurs.
 

@@ -294,57 +294,117 @@ function renderDetails() {
     return;
   }
 
+  if (selectedType === "target") {
+    const target = callFlow.targets.find(
+      (item) => item.id === selectedId
+    );
+
+    detail.innerHTML = `
+      <div class="detail-section">
+        <div class="panel-title">Target</div>
+
+        ${row("Target ID", target.id)}
+        ${row("Type", target.type)}
+        ${row("Label", target.label)}
+        ${row("Number", target.number)}
+      </div>
+
+      <div class="detail-section">
+        <div class="panel-title">Validation</div>
+
+        ${validationState.errors
+          .filter((error) => error.owner === targetKey(target.id))
+          .map(
+            (error) => `
+              <div class="validation-error">
+                ${error.code}: ${error.message}
+              </div>
+            `
+          )
+          .join("")}
+
+        ${validationState.warnings
+          .filter((warning) => warning.owner === targetKey(target.id))
+          .map(
+            (warning) => `
+              <div class="validation-warning">
+                ${warning.code}: ${warning.message}
+              </div>
+            `
+          )
+          .join("")}
+
+        ${
+          validationState.errors.filter(
+            (error) => error.owner === targetKey(target.id)
+          ).length === 0 &&
+          validationState.warnings.filter(
+            (warning) => warning.owner === targetKey(target.id)
+          ).length === 0
+            ? `
+              <div class="helper">
+                No validation issue.
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `;
+
+    return;
+  }
+
   if (selectedType === "node") {
     const node = callFlow.nodes.find((item) => item.id === selectedId);
 
     detail.innerHTML = `
-  <div class="detail-section">
-    <div class="panel-title">General</div>
-    ${row("Node ID", node.id)}
-    ${row("Type", node.type)}
-    ${row("Label", node.label)}
-  </div>
+    <div class="detail-section">
+      <div class="panel-title">General</div>
+      ${row("Node ID", node.id)}
+      ${row("Type", node.type)}
+      ${row("Label", node.label)}
+    </div>
 
-  <div class="detail-section">
-    <div class="panel-title">Editable Fields</div>
+    <div class="detail-section">
+      <div class="panel-title">Editable Fields</div>
 
-    <div class="edit-field">
-      <label>Main Prompt</label>
-      <input
-        class="di-input"
-        type="file"
-        accept=".mp3,.mp4,.wav,audio/mpeg,audio/wav,video/mp4"
-        onchange="updatePromptFile('${node.id}', this.files[0])"
+      <div class="edit-field">
+        <label>Main Prompt</label>
+        <input
+          class="di-input"
+          type="file"
+          accept=".mp3,.mp4,.wav,audio/mpeg,audio/wav,video/mp4"
+          onchange="updatePromptFile('${node.id}', this.files[0])"
+          />
+
+          <div class="helper">
+          Current prompt: <span class="mono">${node.prompt || "No file selected"}</span>
+          </div>
+      </div>
+
+      <div class="edit-field">
+        <label>Timeout</label>
+        <input
+          class="di-input"
+          type="number"
+          value="${node.settings.timeout}"
+          onchange="updateNodeField('${node.id}', 'timeout', this.value)"
         />
+      </div>
 
-        <div class="helper">
-        Current prompt: <span class="mono">${node.prompt || "No file selected"}</span>
-        </div>
+      <div class="edit-field">
+        <label>Retries</label>
+        <input
+          class="di-input"
+          type="number"
+          value="${node.settings.retries}"
+          onchange="updateNodeField('${node.id}', 'retries', this.value)"
+        />
+      </div>
     </div>
 
-    <div class="edit-field">
-      <label>Timeout</label>
-      <input
-        class="di-input"
-        type="number"
-        value="${node.settings.timeout}"
-        onchange="updateNodeField('${node.id}', 'timeout', this.value)"
-      />
-    </div>
-
-    <div class="edit-field">
-      <label>Retries</label>
-      <input
-        class="di-input"
-        type="number"
-        value="${node.settings.retries}"
-        onchange="updateNodeField('${node.id}', 'retries', this.value)"
-      />
-    </div>
-  </div>
-
-  <div class="detail-section">
-    <div class="panel-title">DTMF Actions</div>
+    <div class="detail-section">
+      <div class="panel-title">DTMF Actions</div>
 
     ${Object.entries(node.dtmf)
       .map(
@@ -605,28 +665,38 @@ function validateCallFlow() {
     });
   }
 
+  const reachableIds = new Set();
+
+  reachableIds.add(callFlow.entry_point.start_node_id);
+
+  callFlow.nodes.forEach((node) => {
+    Object.values(node.dtmf || {}).forEach((destination) => {
+      reachableIds.add(destination);
+    });
+  });
+
   callFlow.nodes.forEach((node) => {
     const owner = nodeKey(node.id);
 
-  const destinationToKeys = {};
+    const destinationToKeys = {};
 
-  Object.entries(node.dtmf).forEach(([key, destination]) => {
-    if (!destinationToKeys[destination]) {
-      destinationToKeys[destination] = [];
-    }
+    Object.entries(node.dtmf).forEach(([key, destination]) => {
+      if (!destinationToKeys[destination]) {
+        destinationToKeys[destination] = [];
+      }
 
-    destinationToKeys[destination].push(key);
-  });
+      destinationToKeys[destination].push(key);
+    });
 
-  Object.entries(destinationToKeys).forEach(([destination, keys]) => {
-    if (keys.length > 1) {
-      warnings.push({
-        code: "DuplicateDTMFDestination",
-        owner,
-        message: `DTMF keys ${keys.join(", ")} point to the same destination: ${destination}.`
-      });
-    }
-  });
+    Object.entries(destinationToKeys).forEach(([destination, keys]) => {
+      if (keys.length > 1) {
+        warnings.push({
+          code: "DuplicateDTMFDestination",
+          owner,
+          message: `DTMF keys ${keys.join(", ")} point to the same destination: ${destination}.`
+        });
+      }
+    });
 
     const timeout = Number(node.settings.timeout);
     const retries = Number(node.settings.retries);
@@ -709,7 +779,38 @@ function validateCallFlow() {
           message: `Invalid destination: ${destination}`,
         });
       }
+
+      if (destination === node.id) {
+          warnings.push({
+            code: "SelfReferencingDTMF",
+            owner,
+            message: `DTMF key ${key} links back to its origin node: ${node.id}.`,
+          });
+        }
     });
+  });
+
+  callFlow.nodes.forEach((node) => {
+    if (
+      node.id !== callFlow.entry_point.start_node_id &&
+      !reachableIds.has(node.id)
+    ) {
+      warnings.push({
+        code: "UnreachableNode",
+        owner: nodeKey(node.id),
+        message: `Node ${node.id} is unreachable.`,
+      });
+    }
+  });
+
+  callFlow.targets.forEach((target) => {
+    if (!reachableIds.has(target.id)) {
+      warnings.push({
+        code: "UnreachableTarget",
+        owner: targetKey(target.id),
+        message: `Target ${target.id} is unreachable.`,
+      });
+    }
   });
 
   validationState = {

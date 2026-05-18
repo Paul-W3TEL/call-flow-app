@@ -431,8 +431,7 @@ body {
 }
 
 .graph-node.hover-linked {
-  border-color: var(--warning);
-  background: #fff7e8;
+  background: #ffe1a9;
   box-shadow:
     0 0 0 3px rgba(245, 166, 35, 0.24),
     0 0 14px rgba(245, 166, 35, 0.2),
@@ -447,7 +446,6 @@ body {
 }
 
 .graph-node.active {
-  border-color: var(--p700);
   background: #e0f4f3;
   box-shadow:
     0 0 0 4px rgba(61, 139, 136, 0.34),
@@ -461,18 +459,62 @@ body {
   border-style: dashed;
 }
 
-.list-item.has-error,
-.graph-node.has-error {
-  border-color: var(--error);
-  box-shadow:
-    0 0 0 3px rgba(214, 69, 69, 0.2),
-    var(--shadow-card);
+.graph-node.has-error::after,
+.graph-node.has-warning::after {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
-.list-item.has-warning,
-.graph-node.has-warning {
-  border-color: var(--warning);
-  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18), var(--shadow-card);
+.graph-node.has-error::after {
+  content: "!";
+  background: var(--error);
+}
+
+.graph-node.has-warning::after {
+  content: "!";
+  background: var(--warning);
+}
+
+.list-item {
+  position: relative;
+}
+
+.list-item.has-error::after,
+.list-item.has-warning::after {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.list-item.has-error::after {
+  content: "!";
+  background: var(--error);
+}
+
+.list-item.has-warning::after {
+  content: "!";
+  background: var(--warning);
 }
 
 .validation-warning {

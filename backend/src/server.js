@@ -3,6 +3,10 @@ import cors from "cors";
 import exampleData from "./exampleData.json" assert { type: "json" };
 import apiContract from "./api.json" assert { type: "json" };
 
+import { getEzvmsCompany } from "./ezvms/ezvmsClient.js";
+import { parseGetCompanyResponse } from "./ezvms/ezvmsParser.js";
+import { mapGetCompanyToCallFlow } from "./ezvms/ezvmsMapper.js";
+
 const app = express();
 const port = 3000;
 
@@ -34,6 +38,56 @@ app.get("/api/call-flows/:companyId/:pilotNumber", (req, res) => {
   }
 
   res.json(exampleData);
+});
+
+app.get("/api/ezvms/config", (req, res) => {
+  res.json({
+    soap_url: process.env.EZVMS_SOAP_URL || "not set",
+    provision_id: process.env.EZVMS_PROVISION_ID || "not set",
+    password_set: Boolean(process.env.EZVMS_PROVISION_PASSWORD)
+  });
+});
+
+app.get("/api/ezvms/company/:companyId/mapped/:pilotNumber", async (req, res) => {
+  try {
+    const { companyId, pilotNumber } = req.params;
+
+    const xml = await getEzvmsCompany(companyId);
+    const parsed = parseGetCompanyResponse(xml, companyId);
+
+    if (parsed.result_code !== "OK") {
+      return res.status(502).json({
+        error: "EZVMS_RESULT_FAIL",
+        result_msg: parsed.result_msg,
+        parsed
+      });
+    }
+
+    const callFlow = mapGetCompanyToCallFlow(parsed, pilotNumber);
+
+    res.json(callFlow);
+  } catch (error) {
+    res.status(502).json({
+      error: "EZVMS_MAPPING_ERROR",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/ezvms/company/:companyId/raw", async (req, res) => {
+  try {
+    const xml = await getEzvmsCompany(req.params.companyId);
+    res.type("application/xml").send(xml);
+  } catch (error) {
+    // Log the FULL error object to your terminal console
+    console.error("Full SOAP Fetch Error Details:", error);
+
+    res.status(502).json({
+      error: "EZVMS_SOAP_ERROR",
+      message: error.message,
+      code: error.code
+    });
+  }
 });
 
 app.post("/api/call-flows/validate", (req, res) => {

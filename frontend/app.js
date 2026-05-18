@@ -12,6 +12,9 @@ let validationState = {
   warnings: [],
 };
 
+let availableFlows = [];
+let currentView = "selection";
+
 let selectedType = null;
 let selectedId = null;
 
@@ -19,7 +22,15 @@ let hoveredType = null;
 let hoveredId = null;
 
 function render() {
+  if (currentView === "selection") {
+    renderSelectionPage();
+    return;
+  }
+
+  renderEditorShell();
+
   if (!callFlow) return;
+
   validateCallFlow();
 
   document.getElementById("companyName").textContent = callFlow.company.name;
@@ -483,6 +494,7 @@ function updatePromptFile(nodeId, file) {
   validateCallFlow();
   render();
 }
+
 async function refreshData() {
   const confirmed = confirm(
     "Refresh data from backend? Local modifications will be lost."
@@ -490,9 +502,10 @@ async function refreshData() {
 
   if (!confirmed) return;
 
-  await loadCallFlow();
+  const companyId = callFlow.company.company_id;
+  const pilotNumber = callFlow.entry_point.pilot_number;
 
-  alert("Data refreshed from backend.");
+  await loadCallFlow(companyId, pilotNumber);
 }
 
 function runManualValidation() {
@@ -821,27 +834,25 @@ function graphTypeClass(itemType, objectType) {
   return "type-unknown";
 }
 
-async function loadCallFlow() {
+async function loadCallFlow(companyId, pilotNumber) {
+  currentView = "editor";
+  render(); 
+
   const graphCanvas = document.getElementById("graphCanvas");
   const detailContent = document.getElementById("detailContent");
 
-  graphCanvas.innerHTML = `
-    <div class="detail-section">
-      <div class="panel-title">Loading Call Flow...</div>
-      <div class="helper">Fetching data from backend API.</div>
-    </div>
-  `;
-
-  detailContent.innerHTML = `
-    <div class="detail-section">
-      <div class="panel-title">Waiting for data</div>
-      <div class="helper">The Call Flow is being loaded.</div>
-    </div>
-  `;
+  if (graphCanvas) {
+    graphCanvas.innerHTML = `
+      <div class="detail-section">
+        <div class="panel-title">Loading Call Flow...</div>
+        <div class="helper">Fetching data from backend API.</div>
+      </div>
+    `;
+  }
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/call-flows/${DEFAULT_COMPANY_ID}/${DEFAULT_PILOT_NUMBER}`
+      `${API_BASE_URL}/api/call-flows/${companyId}/${pilotNumber}`
     );
 
     if (!response.ok) {
@@ -857,22 +868,155 @@ async function loadCallFlow() {
     validateCallFlow();
     render();
   } catch (error) {
-    graphCanvas.innerHTML = `
-      <div class="detail-section">
-        <div class="panel-title">API loading error</div>
-        <div class="validation-error">${error.message}</div>
-      </div>
-    `;
-
-    detailContent.innerHTML = `
-      <div class="detail-section">
-        <div class="panel-title">Unable to load Call Flow</div>
-        <div class="helper">
-          Check that the backend server is running and reachable.
+    if (graphCanvas) {
+      graphCanvas.innerHTML = `
+        <div class="detail-section">
+          <div class="panel-title">API loading error</div>
+          <div class="validation-error">${error.message}</div>
         </div>
+      `;
+    }
+  }
+}
+
+async function loadAvailableFlows() {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/call-flows`
+    );
+
+    if (!response.ok) {
+      throw new Error(`API returned HTTP ${response.status}`);
+    }
+
+    availableFlows = await response.json();
+
+    render();
+  } catch (error) {
+    document.getElementById("app").innerHTML = `
+      <div class="fullscreen-message">
+        <div class="panel-title">Unable to load Call Flows</div>
+        <div class="validation-error">${error.message}</div>
       </div>
     `;
   }
 }
 
-loadCallFlow()
+function renderSelectionPage() {
+  const app = document.getElementById("app");
+
+  app.innerHTML = `
+    <div class="selection-page">
+      <div class="selection-card">
+        <div class="brand large">Di<span>amy</span></div>
+
+        <div class="panel-title">
+          Select a Call Flow
+        </div>
+
+        <div class="helper">
+          Choose a company and pilot number to open.
+        </div>
+
+        <div class="flow-list">
+          ${availableFlows.map((flow) => `
+            <div
+              class="flow-card"
+              onclick="loadCallFlow('${flow.company_id}', '${flow.pilot_number}')"
+            >
+              <div class="flow-title">
+                ${flow.label}
+              </div>
+
+              <div class="flow-meta">
+                ${flow.company_name}
+              </div>
+
+              <div class="flow-meta mono">
+                ${flow.pilot_number}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEditorShell() {
+  const app = document.getElementById("app");
+
+  app.innerHTML = `
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <div class="brand">Di<span>amy</span></div>
+          <div class="subtitle">Call Flow Editor</div>
+        </div>
+
+        <div class="header-context">
+          <span class="chip chip-info">Mock API</span>
+          <span id="companyName">Example Company</span>
+          <span class="mono" id="pilotNumber">0123456789</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="di-btn di-btn-light" onclick="clearSelection()">Unselect</button>
+          <button class="di-btn di-btn-light" onclick="goBackToSelection()">Back</button>
+          <button class="di-btn di-btn-secondary" onclick="refreshData()">Refresh</button>
+          <button class="di-btn di-btn-secondary" onclick="runManualValidation()">Validate</button>
+          <button class="di-btn di-btn-primary" onclick="applyToEzvms()">Apply to EZVMS</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <div class="panel-title">Call Flow</div>
+          </div>
+
+          <div class="section-label">Entry point</div>
+          <div id="entryPointItem"></div>
+
+          <div class="section-label">Nodes</div>
+          <div id="nodeList"></div>
+
+          <div class="section-label">Targets</div>
+          <div id="targetList"></div>
+        </aside>
+
+        <section class="canvas-panel">
+          <div class="panel-toolbar">
+            <div>
+              <div class="panel-title">Graph Canvas</div>
+              <div class="helper">Visual mock of the internal Call Flow model</div>
+            </div>
+          </div>
+
+          <div class="graph-canvas" id="graphCanvas"></div>
+        </section>
+
+        <aside class="detail-panel">
+          <div class="panel-title">Detail Panel</div>
+          <div id="detailContent" class="detail-content"></div>
+        </aside>
+      </main>
+
+      <footer class="status-bar">
+        <span id="statusChip" class="chip chip-ok">Clean</span>
+        <span id="validationStatusText">No blocking validation error detected</span>
+      </footer>
+    </div>
+  `;
+}
+
+function goBackToSelection() {
+  currentView = "selection";
+  callFlow = null;
+  selectedType = null;
+  selectedId = null;
+  
+  render();
+}
+
+loadAvailableFlows();

@@ -44,6 +44,23 @@ app.post("/api/call-flows/validate", (req, res) => {
   });
 });
 
+app.get("/api/call-flows", (req, res) => {
+  res.json([
+    {
+      company_id: "1001",
+      company_name: "Example Company",
+      pilot_number: "0123456789",
+      label: "Main Call Flow"
+    },
+    {
+      company_id: "1001",
+      company_name: "Example Company",
+      pilot_number: "0987654321",
+      label: "Night Call Flow"
+    }
+  ]);
+});
+
 app.patch("/api/call-flows/:companyId/:pilotNumber/nodes/:nodeId", (req, res) => {
   const { companyId, pilotNumber, nodeId } = req.params;
 

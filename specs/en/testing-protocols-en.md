@@ -672,7 +672,37 @@ Expected result:
 - the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
-### 5.16 Manual validation
+### 5.16 Reflexive DTMF
+
+**Goal** - Check if a reflexive destination is detected
+
+Action :
+
+- give as a DTMF destination the origin of the link
+
+Expected result:
+
+- the node displays an alert indicator
+- the associated sidebar element displays an alert indicator
+- the Detail Panel show a validation alert
+- `Apply to EZVMS` is not blocked
+
+### 5.17 Isolated element
+
+**Goal** - Check if an isolated element is detected
+
+Action :
+
+- modify DTMF links in order to have an isolated element
+
+Expected result:
+
+- the node displays an alert indicator
+- the associated sidebar element displays an alert indicator
+- the Detail Panel show a validation alert
+- `Apply to EZVMS` is not blocked
+
+### 5.18 Manual validation
 
 **Goal** - Check the `Validate` button
 
@@ -698,7 +728,7 @@ Expected result if errors:
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.17 Local data refresh
+### 5.19 Local data refresh
 
 **Goal** - Check if the `Refresh` button cancels all local modifications
 
@@ -714,7 +744,7 @@ Expected result:
 - errors disappear
 - no selection is active
 
-### 5.18 Application to EZVMS
+### 5.20 Application to EZVMS
 
 **Goal** - Check if the application asks for confirmation and blocks errors
 

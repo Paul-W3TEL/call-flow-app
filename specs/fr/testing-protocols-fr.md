@@ -219,7 +219,7 @@ http://IP_SERVEUR:3000/api/call-flows
 
 Réponse attendue
 
-Liste de Call Flow récupéré depui EZVMS
+Liste de Call Flow récupéré depuis EZVMS
 
 Statut attendu
 
@@ -671,7 +671,38 @@ Résultat attendu :
 - le Detail Panel affiche une alerte de validation
 - `Apply to EZVMS` n'est pas bloqué
 
-### 5.16 Validation manuelle
+### 5.16 DTMF réflexif
+
+**Objectif** - Vérifier qu'une destination réflexive est détectée.
+
+Action :
+
+- donner comme destination DTMF l'élément d'origine du lien
+
+Résultat attendu :
+
+- le noeud concerné affiche un indicateur d'alerte
+- l’élément sidebar correspondant affiche un indicateur d’alerte
+- le Detail Panel affiche une alerte de validation
+- `Apply to EZVMS` n'est pas bloqué
+
+### 5.17 Element isolé
+
+**Objectif** - Vérifier qu'un élément inaccessible est détecté
+
+Action :
+
+- modifier les liens DTMF de sorte à avoir un élément isolé
+
+Résultat attendu :
+
+- le noeud concerné affiche un indicateur d'alerte
+- l’élément sidebar correspondant affiche un indicateur d’alerte
+- le Detail Panel affiche une alerte de validation
+- `Apply to EZVMS` n'est pas bloqué
+
+
+### 5.18 Validation manuelle
 
 **Objectif** - Vérifier le bouton `Validate`.
 
@@ -697,7 +728,7 @@ Résultat attendu si erreur :
 Validation failed. Check highlighted blocks.
 ```
 
-### 5.17 Refresh des données locales
+### 5.19 Refresh des données locales
 
 **Objectif** - Vérifier que le bouton `Refresh` annule les modifications locales.
 
@@ -713,7 +744,7 @@ Résultat attendu :
 - les erreurs disparaissent
 - aucune sélection n’est active
 
-### 5.18 Application vers EZVMS
+### 5.20 Application vers EZVMS
 
 **Objectif** - Vérifier que l’application demande confirmation et bloque les erreurs.
 

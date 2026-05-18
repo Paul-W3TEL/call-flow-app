@@ -46,6 +46,10 @@ Frontend Graph UI
 │       ├── api.json
 │       ├── exampleData.json
 │       ├── exampleSoap.json
+│       ├── ezvms/
+│       │   ├── ezvmsClient.js
+│       │   ├── ezvmsMapper.js
+│       │   └── ezvmsParser.js
 │       ├── soapMapping.json
 │       ├── uiExposureRules.json
 │       ├── validationRules.json
@@ -137,14 +141,12 @@ This model acts as the canonical application structure.
 
 Current work focuses on:
 
-- Better Frontend visuals
 - Backend communication with EZVMS
 
 ---
 
 ## Planned Features
 
-- Better graph visualisation
 - Live API Integration
 - EZVMS synchronization
 - Multi-language Support

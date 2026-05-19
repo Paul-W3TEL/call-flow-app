@@ -1,7 +1,7 @@
 const EZVMS_CONFIG = {
   endpoint:
     process.env.EZVMS_SOAP_URL ||
-    "http://172.16.100.1:8080/soap/services/ExtensionProvisioning",
+    "https://46.28.168.31:8080/soap/services/ExtensionProvisioning",
 
   provisionId:
     process.env.EZVMS_PROVISION_ID ||
@@ -55,7 +55,7 @@ export async function callEzvmsSoap(operationName, parameters = {}) {
       method: "POST",
       headers: {
         "Content-Type": "text/xml; charset=utf-8",
-        SOAPAction: operationName
+        SOAPAction: `urn:${operationName}`
       },
       body
     });
@@ -76,8 +76,6 @@ export async function callEzvmsSoap(operationName, parameters = {}) {
   }
 }
 
-export async function getEzvmsCompany(companyId) {
-  return callEzvmsSoap("GetCompany", {
-    company_id: companyId
-  });
+export async function getEzvmsSoapVersion() {
+  return callEzvmsSoap("GetSOAPVersion", {});
 }

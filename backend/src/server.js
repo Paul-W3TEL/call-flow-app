@@ -3,7 +3,10 @@ import cors from "cors";
 import exampleData from "./exampleData.json" assert { type: "json" };
 import apiContract from "./api.json" assert { type: "json" };
 
-import { getEzvmsSoapVersion } from "./ezvms/ezvmsClient.js";
+import { modifyCompanyMenu,
+        createCompanyMenu,
+        deleteCompanyMenu } from "./ezvms/ezvmsClient.js";
+import { getEzvmsCompany } from "./ezvms/ezvmsClient.js";
 import { parseGetCompanyResponse } from "./ezvms/ezvmsParser.js";
 import { mapGetCompanyToCallFlow } from "./ezvms/ezvmsMapper.js";
 
@@ -28,16 +31,65 @@ app.get("/api/contract", (req, res) => {
   res.json(apiContract);
 });
 
-app.get("/api/call-flows/:companyId/:pilotNumber", (req, res) => {
-  const { companyId, pilotNumber } = req.params;
+app.post("/api/ezvms/test/create-menu", async (req, res) => {
+  try {
+    const xml = await createCompanyMenu({
+      companyId: "10072",
+      menuId: "300",
+      description: "Temp"
+    });
 
-  if (!isMatchingCallFlow(companyId, pilotNumber)) {
-    return res.status(404).json({
-      error: "CALL_FLOW_NOT_FOUND"
+    res.type("application/xml");
+    res.send(xml);
+  } catch (error) {
+    res.status(502).json({
+      error: "EZVMS_CREATE_MENU_ERROR",
+      message: error.message
     });
   }
+});
 
-  res.json(exampleData);
+app.post("/api/ezvms/test/delete-menu", async (req, res) => {
+  try {
+    const xml = await deleteCompanyMenu({
+      companyId: "10072",
+      menuId: "300"
+    });
+
+    res.type("application/xml");
+    res.send(xml);
+  } catch (error) {
+    res.status(502).json({
+      error: "EZVMS_DELETE_MENU_ERROR",
+      message: error.message
+    });
+  }
+});
+
+app.get("/api/call-flows/:companyId/:pilotNumber", async (req, res) => {
+  const { companyId, pilotNumber } = req.params;
+
+  try {
+    const xml = await getEzvmsCompany(companyId);
+    const parsed = parseGetCompanyResponse(xml, companyId);
+
+    if (parsed.result_code !== "OK") {
+      return res.status(502).json({
+        error: "EZVMS_COMPANY_ERROR",
+        result_code: parsed.result_code,
+        result_msg: parsed.result_msg
+      });
+    }
+
+    const callFlow = mapGetCompanyToCallFlow(parsed, pilotNumber);
+
+    res.json(callFlow);
+  } catch (error) {
+    res.status(502).json({
+      error: "EZVMS_CALL_FLOW_FETCH_FAILED",
+      message: error.message
+    });
+  }
 });
 
 app.get("/api/ezvms/config", (req, res) => {
@@ -48,14 +100,15 @@ app.get("/api/ezvms/config", (req, res) => {
   });
 });
 
-app.get("/api/ezvms/version/raw", async (req, res) => {
+app.get("/api/ezvms/company/:companyId/", async (req, res) => {
   try {
-    const xml = await getEzvmsSoapVersion();
+    const xml = await getEzvmsCompany(req.params.companyId);
+
     res.type("application/xml");
     res.send(xml);
   } catch (error) {
     res.status(502).json({
-      error: "EZVMS_SOAP_ERROR",
+      error: "EZVMS_COMPANY_ERROR",
       message: error.message
     });
   }

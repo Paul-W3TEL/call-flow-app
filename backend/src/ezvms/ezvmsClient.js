@@ -76,6 +76,42 @@ export async function callEzvmsSoap(operationName, parameters = {}) {
   }
 }
 
-export async function getEzvmsSoapVersion() {
-  return callEzvmsSoap("GetSOAPVersion", {});
+export async function getEzvmsCompany(companyId) {
+  return callEzvmsSoap("GetCompany", {
+    company_id: companyId
+  });
+}
+
+export async function modifyCompanyMenu({
+  companyId,
+  menuId,
+  description
+}) {
+  return callEzvmsSoap("ModifyCompanyMenu", {
+    company_id: companyId,
+    menu_id: menuId,
+    description
+  });
+}
+
+export async function createCompanyMenu({
+  companyId,
+  menuId,
+  description
+}) {
+  return callEzvmsSoap("CreateCompanyMenu", {
+    company_id: companyId,
+    menu_id: menuId,
+    description
+  });
+}
+
+export async function deleteCompanyMenu({
+  companyId,
+  menuId
+}) {
+  return callEzvmsSoap("DeleteCompanyMenu", {
+    company_id: companyId,
+    menu_id: menuId
+  });
 }

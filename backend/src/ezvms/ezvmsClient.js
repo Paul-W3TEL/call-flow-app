@@ -1,11 +1,11 @@
 const EZVMS_CONFIG = {
   endpoint:
     process.env.EZVMS_SOAP_URL ||
-    "https://46.28.168.31:8080/soap/services/ExtensionProvisioning",
+    "https://46.28.168.31:8082/soap/services/ExtensionProvisioning",
 
   provisionId:
     process.env.EZVMS_PROVISION_ID ||
-    "vmssoap",
+    "paul_soap",
 
     provisionPassword:
     process.env.EZVMS_PROVISION_PASSWORD ||

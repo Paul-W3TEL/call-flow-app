@@ -14,6 +14,13 @@ const EZVMS_CONFIG = {
   namespace: "http://ezvms.product.ezvoicetek.com"
 };
 
+const EZVMS_REST_CONFIG = {
+  baseUrl:
+    process.env.EZVMS_REST_URL ||
+    "https://46.28.168.31:8082"
+};
+
+
 function escapeXml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -38,6 +45,35 @@ function buildSoapEnvelope(operationName, parameters) {
     </ns:${operationName}>
   </soapenv:Body>
 </soapenv:Envelope>`;
+}
+
+export async function getCompanyMenus(sipExtension, companyId) {
+  const url =
+    `${EZVMS_REST_CONFIG.baseUrl}/IVR/companyMenus/` +
+    `${encodeURIComponent(sipExtension)}/` +
+    `${encodeURIComponent(companyId)}`;
+
+  const response = await fetch(url);
+  const text = await response.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `IVR companyMenus did not return JSON. HTTP ${response.status}. ` +
+      `URL: ${url}. Response starts with: ${text.slice(0, 120)}`
+    );
+  }
+
+  if (!response.ok || data.success === false) {
+    throw new Error(
+      `IVR companyMenus failed: HTTP ${response.status} ${data.message || ""}`
+    );
+  }
+
+  return data;
 }
 
 export async function callEzvmsSoap(operationName, parameters = {}) {
@@ -79,39 +115,5 @@ export async function callEzvmsSoap(operationName, parameters = {}) {
 export async function getEzvmsCompany(companyId) {
   return callEzvmsSoap("GetCompany", {
     company_id: companyId
-  });
-}
-
-export async function modifyCompanyMenu({
-  companyId,
-  menuId,
-  description
-}) {
-  return callEzvmsSoap("ModifyCompanyMenu", {
-    company_id: companyId,
-    menu_id: menuId,
-    description
-  });
-}
-
-export async function createCompanyMenu({
-  companyId,
-  menuId,
-  description
-}) {
-  return callEzvmsSoap("CreateCompanyMenu", {
-    company_id: companyId,
-    menu_id: menuId,
-    description
-  });
-}
-
-export async function deleteCompanyMenu({
-  companyId,
-  menuId
-}) {
-  return callEzvmsSoap("DeleteCompanyMenu", {
-    company_id: companyId,
-    menu_id: menuId
   });
 }

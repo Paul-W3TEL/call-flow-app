@@ -1,73 +1,79 @@
-export function mapGetCompanyToCallFlow(companyData, pilotNumber) {
-  const startNodeId =
-    companyData.priority_menu ||
-    companyData.working_hour_menu ||
-    companyData.after_work_menu ||
-    companyData.holiday_menu ||
-    "unknown_start_menu";
 
-  const menuIds = collectMenuIds(companyData);
+export function mapCompanyMenusToCallFlow(apiResponse, companyId, sipExtension) {
+  const companyInfo =
+    apiResponse.header?.[0]?.provisioning?.[0] || {};
+
+  const menus = apiResponse.companyMenus || [];
 
   return {
     company: {
-      company_id: companyData.company_id,
-      name: companyData.company_name || `Company ${companyData.company_id}`
+      company_id: companyId,
+      name: companyInfo.companyName || `Company ${companyId}`
     },
 
     entry_point: {
-      pilot_number: pilotNumber,
-      start_node_id: startNodeId
+      pilot_number: sipExtension,
+      start_node_id: menus[0]?.menu_id || null
     },
 
-    nodes: menuIds.map((menuId) => ({
-      id: menuId,
+    nodes: menus.map((menu) => ({
+      id: menu.menu_id,
       type: "menu",
-      label: `Menu ${menuId}`,
-      prompt: null,
-      dtmf: {},
+      label: menu.f_display_name || menu.menu_desc || menu.menu_id,
+      prompt: menu.main_prompt || null,
+      dtmf: mapDtmf(menu),
       settings: {
-        timeout: 6,
-        retries: 3
-      }
+        timeout: Number(menu.noans_timeout ?? 0),
+        retries: Number(menu.retry_cnt ?? 0)
+      },
+      position: {
+        x: Number(menu.xpos ?? 0),
+        y: Number(menu.ypos ?? 0)
+      },
+      ezvms: menu
     })),
 
-    targets: [],
+    targets: buildTargetsFromMenus(menus),
 
     source: {
-      system: "EZVMS",
-      mode: "partial_get_company_mapping",
-      note: "This is a partial Call Flow reconstructed from GetCompany menu references only."
+      system: "EZVMS_IVR_API",
+      mode: "companyMenus",
+      fetched_at: new Date().toISOString()
     }
   };
 }
 
-function collectMenuIds(companyData) {
-  const rawValues = [
-    companyData.working_hour_menu,
-    companyData.after_work_menu,
-    companyData.holiday_menu,
-    companyData.priority_menu,
-    companyData.black_list_menu,
-    companyData.working_time_menu_id1,
-    companyData.working_time_menu_id2,
-    companyData.working_time_menu_id3,
-    companyData.working_time_menu_id4,
-    companyData.working_time_menu_id5,
-    companyData.working_time_menu_id6,
-    companyData.working_time_menu_id7
-  ];
+function mapDtmf(menu) {
+  const dtmf = {};
 
-  const ids = new Set();
+  for (let i = 0; i <= 9; i++) {
+    const value = menu[`key${i}_value`];
 
-  rawValues.forEach((value) => {
-    if (!value) return;
+    if (value && value !== "string") {
+      dtmf[String(i)] = value;
+    }
+  }
 
-    String(value)
-      .split(",")
-      .map((item) => item.trim())
-      .filter((item) => item && item !== "-1")
-      .forEach((item) => ids.add(item));
+  return dtmf;
+}
+
+function buildTargetsFromMenus(menus) {
+  const menuIds = new Set(menus.map((menu) => menu.menu_id));
+  const targetIds = new Set();
+
+  menus.forEach((menu) => {
+    Object.values(mapDtmf(menu)).forEach((destination) => {
+      if (!menuIds.has(destination)) {
+        targetIds.add(destination);
+      }
+    });
   });
 
-  return [...ids];
+  return [...targetIds].map((id) => ({
+    id,
+    type: "extension",
+    label: `Extension ${id}`,
+    number: id
+  }));
 }
+

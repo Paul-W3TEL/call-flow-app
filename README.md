@@ -96,6 +96,7 @@ All specifications are written in Markdown.
 - Operationnal JSON API, asbtracting SOAP complexity
 - Endpoints for recovery, validation and update of Call Flows
 - Link to fetch call flows and their menus from the Centrex
+- No current link to send the local modifications for EZVMS sync
 
 ### Frontend
 
@@ -103,6 +104,7 @@ All specifications are written in Markdown.
 - Uses the given JSON model to generate a graphe and detail panels
 - Dynamic display of nodes, selection states, hover states and validation infos in real time
 - Modification of prompts and nodes parameters
+- Local memory storage before EZVMS commit
 
 ---
 
@@ -142,7 +144,7 @@ Additionnal features can still be added
 
 Current work focuses on:
 
-- Local memory storage before EZVMS commit
+- no features currently in developpement
 
 ---
 

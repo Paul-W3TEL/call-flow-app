@@ -3,6 +3,7 @@ const API_BASE_URL = "http://172.16.100.251:3000";
 const DEFAULT_COMPANY_ID = "1001";
 const DEFAULT_PILOT_NUMBER = "0123456789";
 
+let modifiedItems = new Set();
 let callFlow = null;
 let originalCallFlow = null;
 
@@ -556,6 +557,8 @@ function updateNodeField(nodeId, field, value) {
     node.settings.retries = Number(value);
   }
 
+  modifiedItems.add(nodeKey(nodeId));
+  saveCallFlowLocally();
   validateCallFlow();
   render();
 }
@@ -567,6 +570,8 @@ function updateDtmf(nodeId, key, value) {
 
   node.dtmf[key] = value;
 
+  modifiedItems.add(nodeKey(nodeId));
+  saveCallFlowLocally();
   validateCallFlow();
   render();
 }
@@ -595,20 +600,27 @@ function updatePromptFile(nodeId, file) {
   }
 
   node.prompt = file.name;
+
+  modifiedItems.add(nodeKey(nodeId));
+  saveCallFlowLocally();
   validateCallFlow();
   render();
 }
 
 async function refreshData() {
+  if (!callFlow?.company?.company_id) return;
+
   const confirmed = confirm(
-    "Refresh data from backend? Local modifications will be lost."
+    "Refresh from EZVMS? Local unsaved changes for this call flow will be replaced."
   );
 
   if (!confirmed) return;
 
   const companyId = callFlow.company.company_id;
 
-  await loadCallFlow(companyId);
+  clearCallFlowLocally(companyId);
+  modifiedItems.clear();
+  await loadCallFlow(companyId, { refresh: true });
 }
 
 function runManualValidation() {
@@ -638,7 +650,15 @@ function applyToEzvms() {
 
   if (!confirmed) return;
 
-  alert("Modifications have been sent!");
+  modifiedItems.clear();
+  clearCallFlowLocally(callFlow.company.company_id);
+
+  originalCallFlow = structuredClone(callFlow);
+
+  validateCallFlow();
+  render();
+
+  alert("Sent modifs!");
 }
 
 function linkKey(type, id) {
@@ -673,12 +693,8 @@ function entryKey() {
 }
 
 function isModified(type, id) {
-  if (type !== "node") return false;
-
-  const current = callFlow.nodes.find((node) => node.id === id);
-  const original = originalCallFlow.nodes.find((node) => node.id === id);
-
-  return JSON.stringify(current) !== JSON.stringify(original);
+  const key = type === "entry" ? entryKey() : `${type}:${id}`;
+  return modifiedItems.has(key);
 }
 
 function hasError(type, id) {
@@ -978,19 +994,28 @@ function graphTypeClass(itemType, objectType) {
   return "type-unknown";
 }
 
-async function loadCallFlow(companyId) {
+async function loadCallFlow(companyId, options = {}) {
   currentView = "editor";
   render();
 
-  const graphCanvas = document.getElementById("graphCanvas");
+  const shouldRefresh = options.refresh === true;
 
-  if (graphCanvas) {
-    graphCanvas.innerHTML = `
-      <div class="detail-section">
-        <div class="panel-title">Loading Call Flow...</div>
-        <div class="helper">Fetching company ${companyId} from backend API.</div>
-      </div>
-    `;
+  if (!shouldRefresh) {
+    const local = loadCallFlowLocally(companyId);
+
+    if (local && !options.refresh) {
+      callFlow = local.callFlow;
+      modifiedItems = local.modifiedItems;
+
+      originalCallFlow = structuredClone(callFlow);
+
+      selectedType = null;
+      selectedId = null;
+
+      validateCallFlow();
+      render();
+      return;
+    }
   }
 
   try {
@@ -1004,20 +1029,24 @@ async function loadCallFlow(companyId) {
 
     callFlow = await response.json();
     originalCallFlow = structuredClone(callFlow);
+    modifiedItems = new Set();
+
+    saveCallFlowLocally();
 
     selectedType = null;
     selectedId = null;
 
     validateCallFlow();
     render();
-  } catch (error) {
-    if (graphCanvas) {
-      graphCanvas.innerHTML = `
-        <div class="detail-section">
-          <div class="panel-title">API loading error</div>
-          <div class="validation-error">${error.message}</div>
-        </div>
-      `;
+    }
+    catch (error) {
+      if (graphCanvas) {
+        graphCanvas.innerHTML = `
+          <div class="detail-section">
+            <div class="panel-title">API loading error</div>
+            <div class="validation-error">${error.message}</div>
+          </div>
+        `;
     }
   }
 }
@@ -1153,6 +1182,43 @@ function goBackToSelection() {
   selectedId = null;
   
   render();
+}
+
+function getCallFlowStorageKey(companyId) {
+  return `diamy.callFlow.${companyId}`;
+}
+
+function saveCallFlowLocally() {
+  if (!callFlow?.company?.company_id) return;
+
+  localStorage.setItem(
+    getCallFlowStorageKey(callFlow.company.company_id),
+    JSON.stringify({
+      callFlow,
+      modifiedItems: [...modifiedItems]
+    })
+  );
+}
+
+function loadCallFlowLocally(companyId) {
+  const raw = localStorage.getItem(getCallFlowStorageKey(companyId));
+  if (!raw) return null;
+
+  try {
+    const stored = JSON.parse(raw);
+
+    return {
+      callFlow: stored.callFlow || stored,
+      modifiedItems: new Set(stored.modifiedItems || [])
+    };
+  } catch {
+    clearCallFlowLocally(companyId);
+    return null;
+  }
+}
+
+function clearCallFlowLocally(companyId) {
+  localStorage.removeItem(getCallFlowStorageKey(companyId));
 }
 
 render();

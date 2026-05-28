@@ -12,7 +12,7 @@ export function mapCompanyMenusToCallFlow(apiResponse, companyId, sipExtension) 
     },
 
     entry_point: {
-      pilot_number: sipExtension,
+      pilot_number: apiResponse.header.provisioning.callerNum || null,
       start_node_id: menus[0]?.menu_id || null
     },
 

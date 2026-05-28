@@ -1,10 +1,10 @@
 # Protocoles de test
 
 - **Titre du document** > Protocoles de test
-- **Version** > 1.2
+- **Version** > 1.3
 - **Status** > Brouillon interne
 - **Auteur** > Paul Koster
-- **Date** > 12 mai 2026
+- **Date** > 28 mai 2026
 - **Confidentialité** > Document interne – W3TEL / TEQTEL
 
 ------
@@ -16,6 +16,7 @@
 | 1.0     | 11 mai 2026 | Paul Koster | Version initial             |
 | 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API      |
 | 1.2     | 12 mai 2026 | Paul Koster | Protocoles de test frontend |
+| 1.3     | 28 mai 2026 | Paul Koster | Tests pour l'app complète   |
 
 ------
 
@@ -207,34 +208,14 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.4 Lister les Call Flow
-
-**Objectif** - Vérifier que les Call Flows du serveur sont accessibles.
-
-URL navigateur
-
-```txt
-http://IP_SERVEUR:3000/api/call-flows
-```
-
-Réponse attendue
-
-Liste de Call Flow récupéré depuis EZVMS
-
-Statut attendu
-
-```txt
-HTTP 200
-```
-
-### 4.5 Récupération d’un Call Flow valide
+### 4.4 Récupération d’un Call Flow valide
 
 **Objectif** - Vérifier que l’API retourne les données d'exemple du Call Flow.
 
 URL navigateur
 
 ```txt
-http://IP_SERVEUR:3000/api/call-flows/1001/0123456789
+http://IP_SERVEUR:3000/api/call-flows/100072
 ```
 
 Réponse attendue
@@ -244,12 +225,12 @@ La réponse doit contenir :
 ```json
 {
   "company": {
-    "company_id": "1001",
-    "name": "Example Company"
+    "company_id": "10072",
+    "name": "Company 10072"
   },
   "entry_point": {
-    "pilot_number": "0123456789",
-    "start_node_id": "menu_1"
+    "pilot_number": 8933100000001,
+    "start_node_id": "100"
   },
   "nodes": [],
   "targets": []
@@ -264,161 +245,21 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.6 Récupération d’un Call Flow inexistant
+### 4.5 Récupération d’un Call Flow inexistant
 
 **Objectif** - Vérifier que l’API retourne une erreur si l’identifiant société et/ou le numéro pilote est incorrect.
 
 URL navigateur
 
 ```txt
-http://IP_SERVEUR:3000/api/call-flows/9999/0000000000
-http://IP_SERVEUR:3000/api/call-flows/1001/0000000000
-http://IP_SERVEUR:3000/api/call-flows/9999/0123456789
+http://IP_SERVEUR:3000/api/call-flows/9999/
 ```
 
 Ou n'importe quel URL non valide
-Les URLs suivent cette logique :
-``.../call-flows/[company_id]/[pilot_number]``
 
-Réponse attendue, dans les 3 cas
+Réponse attendue :
 
-```json
-{
-  "error": "CALL_FLOW_NOT_FOUND"
-}
-```
-
-Statut attendu
-
-```txt
-HTTP 404
-```
-
-### 4.7 Validation d’un Call Flow
-
-**Objectif** - Vérifier que l’endpoint de validation répond.
-
-Commande serveur
-
-```bash
-curl -X POST http://localhost:3000/api/call-flows/validate \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-Réponse attendue
-
-```json
-{
-  "status": "valid",
-  "errors": [],
-  "warnings": []
-}
-```
-
-Statut attendu
-
-```txt
-HTTP 200
-```
-
-### 4.8 Mise à jour d’un noeud d'exemple
-
-**Objectif** - Vérifier que l’API accepte une modification autorisée en mode brouillon.
-
-Commande serveur
-
-```bash
-curl -X PATCH http://localhost:3000/api/call-flows/1001/0123456789/nodes/menu_1 \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"new-welcome.wav"}'
-```
-
-Réponse attendue
-
-```json
-{
-  "status": "draft_saved",
-  "call_flow": {}
-}
-```
-
-Dans `call_flow`, le noeud `menu_1` doit contenir :
-
-```json
-{
-  "prompt": "new-welcome.wav"
-}
-```
-
-Statut attendu
-
-```txt
-HTTP 200
-```
-
-### 4.9 Tentative de modification d’un champ interdit
-
-**Objectif** - Vérifier que l’API refuse la modification d’un champ non éditable.
-
-Commande serveur
-
-```bash
-curl -X PATCH http://localhost:3000/api/call-flows/1001/0123456789/nodes/menu_1 \
-  -H "Content-Type: application/json" \
-  -d '{"id":"changed_id"}'
-```
-
-Réponse attendue
-
-```json
-{
-  "error": "READ_ONLY_FIELD"
-}
-```
-
-Statut attendu
-
-```txt
-HTTP 400
-```
-
-### 4.10 Application d'exemple vers EZVMS
-
-**Objectif** - Vérifier que l’endpoint d’application demande une confirmation.
-
-Commande sans confirmation
-
-```bash
-curl -X POST http://localhost:3000/api/call-flows/1001/0123456789/apply \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-Réponse attendue
-
-```json
-{
-  "error": "CONFIRMATION_REQUIRED"
-}
-```
-
-Commande avec confirmation
-
-```bash
-curl -X POST http://localhost:3000/api/call-flows/1001/0123456789/apply \
-  -H "Content-Type: application/json" \
-  -d '{"confirmed":true}'
-```
-
-Réponse attendue
-
-```json
-{
-  "status": "applied",
-  "message": "Mock apply only. No EZVMS SOAP call was made."
-}
-```
+Même réponse qu'un Call Flow valide, mais cette fois les tableaux `nodes` et `targets` doivent être vides.
 
 ------
 
@@ -437,9 +278,8 @@ frontend/index.html
 Résultat attendu :
 
 - L'écran de sélection est visible.
-- Le titre "Select a Call Flow" est présent.
-- La liste des flux disponibles est chargée depuis l'API.
-- Chaque carte de flux affiche le libellé, le nom de l'entreprise et le numéro pilote.
+- Le titre "Open a Call Flow" est présent.
+- Le champ d'entré est visible avec la valeur par défaut (10072)
 
 ### 5.2 Chargement d'un Call Flow
 
@@ -447,7 +287,8 @@ Résultat attendu :
 
 Actions :
 
-- Cliquer sur une carte de flux dans la liste.
+- entrer une ID de Call Flow valide (ou laisser 10072)
+- clicker sur load
 
 Résultat attendu :
 

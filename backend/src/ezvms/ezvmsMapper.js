@@ -8,7 +8,7 @@ export function mapCompanyMenusToCallFlow(apiResponse, companyId, sipExtension) 
   return {
     company: {
       company_id: companyId,
-      name: companyInfo.companyName || `Company ${companyId}`
+      name: apiResponse.header.user.name || `Company ${companyId}`
     },
 
     entry_point: {

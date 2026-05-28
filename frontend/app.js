@@ -278,19 +278,63 @@ function renderDetails() {
   if (selectedType === "entry") {
     detail.innerHTML = `
         <div class="detail-section">
-        <div class="panel-title">Entry Point</div>
-        ${row("Company ID", callFlow.company.company_id)}
-        ${row("Company", callFlow.company.name)}
-        ${row("Pilot Number", callFlow.entry_point.pilot_number)}
-        ${row("Start Node", callFlow.entry_point.start_node_id)}
+          <div class="panel-title">Entry Point</div>
+
+          ${row("Company ID", callFlow.company.company_id)}
+          ${row("Company", callFlow.company.name)}
+          ${row("Pilot Number", callFlow.entry_point.pilot_number)}
+          ${row("Start Node", callFlow.entry_point.start_node_id)}
         </div>
-            
+
         <div class="detail-section">
-        <div class="panel-title">Rules</div>
-        ${row("Multiplicity", "Single entry point")}
-        ${row("Editable", "No")}
+          <div class="panel-title">Rules</div>
+
+          ${row("Multiplicity", "Single entry point")}
+          ${row("Editable", "No")}
+        </div>
+
+        <div class="detail-section">
+          <div class="panel-title">Validation</div>
+
+          ${validationState.errors
+            .filter((error) => error.owner === "entry:entry_point")
+            .map(
+              (error) => `
+                <div class="validation-error">
+                  ${error.code}: ${error.message}
+                </div>
+              `
+            )
+            .join("")}
+
+          ${validationState.warnings
+            .filter((warning) => warning.owner === "entry:entry_point")
+            .map(
+              (warning) => `
+                <div class="validation-warning">
+                  ${warning.code}: ${warning.message}
+                </div>
+              `
+            )
+            .join("")}
+
+          ${
+            validationState.errors.filter(
+              (error) => error.owner === "entry:entry_point"
+            ).length === 0 &&
+            validationState.warnings.filter(
+              (warning) => warning.owner === "entry:entry_point"
+            ).length === 0
+              ? `
+                <div class="helper">
+                  No validation issue.
+                </div>
+              `
+              : ""
+          }
         </div>
     `;
+
     return;
   }
 
@@ -563,9 +607,8 @@ async function refreshData() {
   if (!confirmed) return;
 
   const companyId = callFlow.company.company_id;
-  const pilotNumber = callFlow.entry_point.pilot_number;
 
-  await loadCallFlow(companyId, pilotNumber);
+  await loadCallFlow(companyId);
 }
 
 function runManualValidation() {
@@ -935,25 +978,24 @@ function graphTypeClass(itemType, objectType) {
   return "type-unknown";
 }
 
-async function loadCallFlow(companyId, pilotNumber) {
+async function loadCallFlow(companyId) {
   currentView = "editor";
-  render(); 
+  render();
 
   const graphCanvas = document.getElementById("graphCanvas");
-  const detailContent = document.getElementById("detailContent");
 
   if (graphCanvas) {
     graphCanvas.innerHTML = `
       <div class="detail-section">
         <div class="panel-title">Loading Call Flow...</div>
-        <div class="helper">Fetching data from backend API.</div>
+        <div class="helper">Fetching company ${companyId} from backend API.</div>
       </div>
     `;
   }
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/call-flows/${companyId}/${pilotNumber}`
+      `${API_BASE_URL}/api/call-flows/${encodeURIComponent(companyId)}/`
     );
 
     if (!response.ok) {
@@ -980,29 +1022,6 @@ async function loadCallFlow(companyId, pilotNumber) {
   }
 }
 
-async function loadAvailableFlows() {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/call-flows`
-    );
-
-    if (!response.ok) {
-      throw new Error(`API returned HTTP ${response.status}`);
-    }
-
-    availableFlows = await response.json();
-
-    render();
-  } catch (error) {
-    document.getElementById("app").innerHTML = `
-      <div class="fullscreen-message">
-        <div class="panel-title">Unable to load Call Flows</div>
-        <div class="validation-error">${error.message}</div>
-      </div>
-    `;
-  }
-}
-
 function renderSelectionPage() {
   const app = document.getElementById("app");
 
@@ -1011,37 +1030,53 @@ function renderSelectionPage() {
       <div class="selection-card">
         <div class="brand large">Di<span>amy</span></div>
 
-        <div class="panel-title">
-          Select a Call Flow
-        </div>
+        <div class="panel-title">Open a Call Flow</div>
 
         <div class="helper">
-          Choose a company and pilot number to open.
+          Enter a company ID to retrieve its call flow from EZVMS.
         </div>
 
-        <div class="flow-list">
-          ${availableFlows.map((flow) => `
-            <div
-              class="flow-card"
-              onclick="loadCallFlow('${flow.company_id}', '${flow.pilot_number}')"
-            >
-              <div class="flow-title">
-                ${flow.label}
-              </div>
+        <div class="selector-row">
+          <input
+            id="companyIdInput"
+            class="di-input mono"
+            type="text"
+            placeholder="Company ID"
+            value="10072"
+            onkeydown="handleCompanyInputKeydown(event)"
+          />
 
-              <div class="flow-meta">
-                ${flow.company_name}
-              </div>
-
-              <div class="flow-meta mono">
-                ${flow.pilot_number}
-              </div>
-            </div>
-          `).join("")}
+          <button class="di-btn di-btn-primary" onclick="loadCompanyFromInput()">
+            Load
+          </button>
         </div>
+
+        <div id="selectionError" class="validation-error"></div>
       </div>
     </div>
   `;
+}
+
+function loadCompanyFromInput() {
+  const input = document.getElementById("companyIdInput");
+  const error = document.getElementById("selectionError");
+
+  const companyId = input.value.trim();
+
+  error.textContent = "";
+
+  if (!companyId) {
+    error.textContent = "Please enter a company ID.";
+    return;
+  }
+
+  loadCallFlow(companyId);
+}
+
+function handleCompanyInputKeydown(event) {
+  if (event.key === "Enter") {
+    loadCompanyFromInput();
+  }
 }
 
 function renderEditorShell() {
@@ -1120,4 +1155,4 @@ function goBackToSelection() {
   render();
 }
 
-loadAvailableFlows();
+render();

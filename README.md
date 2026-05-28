@@ -44,8 +44,6 @@ Frontend Graph UI
 │   ├── package.json
 │   └── src/
 │       ├── api.json
-│       ├── exampleData.json
-│       ├── exampleSoap.json
 │       ├── ezvms/
 │       │   ├── ezvmsClient.js
 │       │   ├── ezvmsMapper.js
@@ -97,7 +95,7 @@ All specifications are written in Markdown.
 
 - Operationnal JSON API, asbtracting SOAP complexity
 - Endpoints for recovery, validation and update of Call Flows
-- Currently uses static data
+- Link to fetch call flows and their menus from the Centrex
 
 ### Frontend
 
@@ -139,15 +137,17 @@ This model acts as the canonical application structure.
 
 ## Current Project Phase
 
+The main project is finished and functionnal
+Additionnal features can still be added
+
 Current work focuses on:
 
-- Backend communication with EZVMS
+- Local memory storage before EZVMS commit
 
 ---
 
 ## Planned Features
 
-- Live API Integration
 - EZVMS synchronization
 - Multi-language Support
 

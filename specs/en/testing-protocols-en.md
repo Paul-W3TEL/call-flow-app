@@ -1,7 +1,7 @@
 # Testing protocols
 
 - **Document title** > Testing protocols
-- **Version** > 1.3
+- **Version** > 1.4
 - **Status** > Internal draft
 - **Author** > Paul Koster
 - **Date** > May 28th 2026
@@ -11,12 +11,13 @@
 
 ## Version history
 
-| Version | Date          | Author      | Description                |
-| ------- | ------------- | ----------- | -------------------------- |
-| 1.0     | May 11th 2026 | Paul Koster | Initial version            |
-| 1.1     | May 11th 2026 | Paul Koster | API testing protocols      |
-| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols |
-| 1.3     | May 28th 2026 | Paul Koster | Testing for the full app   |
+| Version | Date          | Author      | Description                    |
+| ------- | ------------- | ----------- | ------------------------------ |
+| 1.0     | May 11th 2026 | Paul Koster | Initial version                |
+| 1.1     | May 11th 2026 | Paul Koster | API testing protocols          |
+| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols     |
+| 1.3     | May 28th 2026 | Paul Koster | Testing for the full app       |
+| 1.4     | May 28th 2026 | Paul Koster | Local memory testing protocols |
 
 ------
 
@@ -636,5 +637,71 @@ Expected result:
 ```txt
 Cannot apply: blocking validation errors exist.
 ```
+
+### 5.21 Parameter Modification Tracking
+
+**Goal** - Check if altering a simple setting or node prompt tags the affected block with a modified visual state and buffers changes locally.
+
+Actions:
+
+- Load a valid Call Flow (e.g., Company ID `10072`).
+- Select a node from the Sidebar or Graph Canvas.
+- Change the `Timeout` or `Retries` parameter to a valid alternative value.
+
+Expected Result:
+
+- The updated value is rendered in the Detail Panel.
+- The altered node instantly shifts to a modified state, applying a dashed border style to both its Graph Node box and its corresponding Sidebar component.
+- The global data structure preserves the update in memory
+
+### 5.22 Local Client-Side Draft Persistence
+
+**Goal** - Check if unsaved call flow mutations automatically mirror to browser storage and survive accidental page refreshes.
+
+Actions:
+
+- Select an active node and adjust its properties or DTMF routing tables.
+- Open the browser's developer tools (F12) -> Application/Storage Tab -> Local Storage.
+- Locate the entry matching key pattern `diamy.callFlow.<companyId>` (e.g., `diamy.callFlow.10072`).
+- Refresh the web page completely (F5 or Ctrl+F5) and re-enter the exact same Company ID on the Selection Screen.
+
+Expected Result:
+
+- Upon modification, `localStorage` must instantly contain a serialized JSON payload carrying the mutated `callFlow` tree alongside an array representing `modifiedItems`.
+- Following page reloading and re-selection of the company, the application bypasses remote server queries and restores state instantly from local disk memory.
+- Dashed modification borders remain present on all altered nodes, demonstrating proper state recovery.
+
+### 5.23 Cache Refresh
+
+**Goal** - Check if choosing to manually synchronize remote data drops current local storage structures and resets client tracking back to ground truth.
+
+Actions:
+
+- Introduce several changes to a Call Flow configuration to establish an active local draft.
+- Verify that `diamy.callFlow.<companyId>` populates `localStorage`.
+- Click the `Refresh` action link located inside the application header layout, then validate the confirmation warning box dialog prompt.
+
+Expected Result:
+
+- Accepting the modal warning trigger forces a localized storage wipe operation, completely deleting the `diamy.callFlow.<companyId>` target string configuration key from the browser database.
+- The application executes an HTTP GET transaction to the base API endpoint routing path (`/api/call-flows/:companyId/`).
+- The `modifiedItems` selection registry drops all active tokens, removing dashed borders across UI components.
+
+### 5.24 Cache Clearance Post Apply Transaction
+
+**Goal** - Check if local memory records and serialized web databases clear cleanly once mutations successfully commit to the core engine platform.
+
+Actions:
+
+- Stage valid workflow modifications on an active flow configuration graph schema to construct a local modified cache draft.
+- Review `localStorage` to confirm that the company draft block key is present.
+- Click the `Apply to EZVMS` operational link, confirm the action inside the alert verification overlay, and wait for confirmation.
+
+Expected Result:
+
+- Upon validation acceptance, the engine initiates data submission protocols.
+- Client logic triggers an explicit wipe statement against local records.
+- The tracking engine unregisters dirty nodes from the runtime index.
+- Visually, all dashed element rendering artifacts normalize into solid borders, indicating a state of synchronization.
 
 ------

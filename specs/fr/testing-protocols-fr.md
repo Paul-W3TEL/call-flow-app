@@ -1,7 +1,7 @@
 # Protocoles de test
 
 - **Titre du document** > Protocoles de test
-- **Version** > 1.3
+- **Version** > 1.4
 - **Status** > Brouillon interne
 - **Auteur** > Paul Koster
 - **Date** > 28 mai 2026
@@ -11,12 +11,13 @@
 
 ## Historique des versions
 
-| Version | Date        | Auteur      | Description                 |
-| ------- | ----------- | ----------- | --------------------------- |
-| 1.0     | 11 mai 2026 | Paul Koster | Version initial             |
-| 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API      |
-| 1.2     | 12 mai 2026 | Paul Koster | Protocoles de test frontend |
-| 1.3     | 28 mai 2026 | Paul Koster | Tests pour l'app complète   |
+| Version | Date        | Auteur      | Description                       |
+| ------- | ----------- | ----------- | --------------------------------- |
+| 1.0     | 11 mai 2026 | Paul Koster | Version initial                   |
+| 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API            |
+| 1.2     | 12 mai 2026 | Paul Koster | Protocoles de test frontend       |
+| 1.3     | 28 mai 2026 | Paul Koster | Tests pour l'app complète         |
+| 1.4     | 28 mai 2026 | Paul Koster | Protocoles de test mémoire locale |
 
 ------
 
@@ -542,7 +543,6 @@ Résultat attendu :
 - le Detail Panel affiche une alerte de validation
 - `Apply to EZVMS` n'est pas bloqué
 
-
 ### 5.18 Validation manuelle
 
 **Objectif** - Vérifier le bouton `Validate`.
@@ -637,5 +637,71 @@ Résultat attendu :
 ```txt
 Cannot apply: blocking validation errors exist.
 ```
+
+### 5.21 Suivi des Modifications de Paramètres
+
+**Objectif** – Vérifier que l'altération d'un paramètre simple ou d'un prompt applique un état visuel modifié au bloc concerné et l'enregistre en mémoire locale.
+
+Actions :
+
+- Charger un Call Flow valide (ex: Société ID `10072`).
+- Sélectionner un noeud depuis la Sidebar ou le Graph Canvas.
+- Modifier la valeur numérique du champ `Timeout` ou `Retries` par une autre valeur valide.
+
+Résultat attendu :
+
+- Le nouveau paramètre est rendu et mis à jour au sein du Detail Panel.
+- Le noeud bascule instantanément en état modifié : une bordure en pointillés habille le bloc du Graph Canvas ainsi que le bouton correspondant dans la Sidebar.
+- L'arborescence globale intègre la valeur révisée, et l'identifiant technique de suivi est poussé au sein de la collection d'indexation `modifiedItems`.
+
+### 5.22 Persistance du Brouillon Client
+
+**Objectif** – Vérifier qu'un brouillon de modification non publié est automatiquement préservé sur le stockage navigateur et survit à un rechargement accidentel de page.
+
+Actions :
+
+- Sélectionner un noeud actif et effectuer une modification de prompt ou de routage DTMF.
+- Ouvrir l'outil de développement du navigateur (F12) -> Onglet Application/Stockage -> Local Storage.
+- Repérer l'entrée associée à la clé `diamy.callFlow.<companyId>` (ex: `diamy.callFlow.10072`).
+- Rafraîchir entièrement la page du navigateur (F5 ou Ctrl+F5) puis ressaisir le même Identifiant Entreprise sur l'Écran de Sélection.
+
+Résultat attendu :
+
+- Dès la modification d'un champ, le `localStorage` doit contenir l'objet JSON sérialisé incluant l'arbre `callFlow` modifié et la liste d'éléments `modifiedItems`.
+- Après rechargement et re-sélection, l'application court-circuite l'appel serveur réseau et charge les données directement depuis la mémoire du disque local client.
+- L'habillage graphique en pointillés des blocs modifiés reste actif, démontrant la bonne restauration de l'état de session.
+
+### 5.23 Invalidation du Cache (Refresh)
+
+**Objectif** – Vérifier que l'activation du rafraîchissement manuel écrase le stockage temporaire local et réinitialise l'application sur les données serveur distantes.
+
+Actions :
+
+- Réaliser plusieurs modifications pour générer un état de brouillon local actif (présence de bordures en pointillés).
+- Valider la présence de l'objet de stockage temporaire `diamy.callFlow.<companyId>` au sein du `localStorage`.
+- Cliquer sur l'action `Refresh` présente dans la barre d'en-tête, puis accepter les termes du message d'avertissement de la modale de confirmation.
+
+Résultat attendu :
+
+- La confirmation de l'action entraîne la suppression immédiate de l'enregistrement de clé `diamy.callFlow.<companyId>` de la table `localStorage` navigateur.
+- L'application relance une transaction HTTP GET distante vers l'API centrale sur la route `/api/call-flows/:companyId/`.
+- L'index technique de modification locale est intégralement réinitialisé, provoquant le retour au style graphique nominal sans pointillés.
+
+### 5.24 Validation Distante
+
+**Objectif** – Vérifier que les tables de stockage temporaire local sont supprimé une fois les modifications appliquées vers le moteur distant.
+
+Actions :
+
+- Mettre en place des modifications structurelles valides sur le graphe d'appel pour basculer l'application en état de cache local modifié.
+- Confirmer la présence de la clé associée dans le `localStorage` du navigateur.
+- Déclencher le processus d'envoi en cliquant sur le bouton `Apply to EZVMS`, valider l'alerte d'avertissement et intercepter la confirmation positive.
+
+Résultat attendu :
+
+- Suite à l'acceptation de la modale, l'application procède à la soumission des données vers le moteur.
+- Une routine interne s'exécute automatiquement, entraînant le nettoyage complet de la clé de cache du `localStorage`.
+- L'ensemble des entrées d'indexation temporaires stockées en mémoire est purgé.
+- À l'écran, toutes les bordures en pointillés se figent à nouveau en bordures pleines nominales, indiquant une synchronisation parfaite avec EZVMS.
 
 ------

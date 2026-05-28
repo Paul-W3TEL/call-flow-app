@@ -49,11 +49,17 @@ function buildSoapEnvelope(operationName, parameters) {
 
 export async function getCompanyMenus(sipExtension, companyId) {
   const url =
-    `${EZVMS_REST_CONFIG.baseUrl}/IVR/companyMenus/` +
+    `https://demo.phoneportal.fr/api/voip/v1/IVR/companyMenus/` +
     `${encodeURIComponent(sipExtension)}/` +
     `${encodeURIComponent(companyId)}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${process.env.EZVMS_REST_TOKEN}`,
+      Accept: "application/json"
+    }
+  });
   const text = await response.text();
 
   let data;

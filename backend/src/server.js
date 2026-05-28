@@ -7,6 +7,7 @@ import { mapCompanyMenusToCallFlow  } from "./ezvms/ezvmsMapper.js";
 
 const app = express();
 const port = 3000;
+const sipExtension = 8933100000001
 
 app.use(cors());
 app.use(express.json());
@@ -19,15 +20,15 @@ app.get("/api/contract", (req, res) => {
   res.json(apiContract);
 });
 
-app.get("/api/call-flows/:companyId/:pilotNumber", async (req, res) => {
+app.get("/api/call-flows/:companyId/", async (req, res) => {
   try {
-    const { companyId, pilotNumber } = req.params;
+    const { companyId } = req.params;
 
-    const rawData = await getCompanyMenus(pilotNumber, companyId);
+    const rawData = await getCompanyMenus(sipExtension, companyId);
     const callFlow = mapCompanyMenusToCallFlow(
       rawData,
       companyId,
-      pilotNumber
+      sipExtension
     );
 
     res.json(callFlow);

@@ -6,6 +6,7 @@ const DEFAULT_PILOT_NUMBER = "0123456789";
 let modifiedItems = new Set();
 let callFlow = null;
 let originalCallFlow = null;
+let graphZoom = 1;
 
 let validationState = {
   status: "valid",
@@ -136,10 +137,19 @@ function renderGraph() {
   const maxX = Math.max(...Object.values(positions).map((p) => p.x));
   const maxY = Math.max(...Object.values(positions).map((p) => p.y));
 
-  canvas.style.height = `${maxY + 220}px`;
-  canvas.style.minWidth = `${maxX + 320}px`;
+  canvas.style.height = `${(maxY + 220) * graphZoom}px`;
+  canvas.style.minWidth = `${(maxX + 320) * graphZoom}px`;
 
   canvas.innerHTML = `
+    <div
+      class="graph-zoom-layer"
+      style="
+        transform: scale(${graphZoom});
+        transform-origin: top left;
+        width: ${maxX + 320}px;
+        height: ${maxY + 220}px;
+      "
+    >
     ${links.map((link, index) => {
       const from = positions[link.from];
       const to = positions[link.to];
@@ -160,6 +170,7 @@ function renderGraph() {
 
     <div
       class="graph-node ${graphTypeClass("entry", "entry_point")} ${itemClasses("entry", "entry_point")}"
+      ${validationTitle("entry", "entry_point")}
       data-link-key="${linkKey("entry", "entry_point")}"
       style="left: ${positions.entry_point.x}px; top: ${positions.entry_point.y}px;"
       onclick="selectItem('entry', 'entry_point')"
@@ -174,6 +185,7 @@ function renderGraph() {
     ${nodes.map((node) => `
       <div
         class="graph-node ${graphTypeClass("node", node.type)} ${itemClasses("node", node.id)}"
+        ${validationTitle("node", node.id)}
         data-link-key="${linkKey("node", node.id)}"
         style="left: ${positions[node.id].x}px; top: ${positions[node.id].y}px;"
         onclick="selectItem('node', '${node.id}')"
@@ -182,14 +194,15 @@ function renderGraph() {
       >
         <div class="graph-title">${node.label}</div>
         <div class="graph-id">${node.id}</div>
+        <div class="helper">${node.type}</div>
         <div class="helper">Prompt: ${node.prompt || "None"}</div>
-        <div class="helper">Retries: ${node.settings?.retries ?? "-"}</div>
       </div>
     `).join("")}
 
     ${targets.map((target) => `
       <div
         class="graph-node ${graphTypeClass("target", target.type)} ${itemClasses("target", target.id)}"
+        ${validationTitle("target", target.id)}
         data-link-key="${linkKey("target", target.id)}"
         style="left: ${positions[target.id].x}px; top: ${positions[target.id].y}px;"
         onclick="selectItem('target', '${target.id}')"
@@ -202,6 +215,7 @@ function renderGraph() {
         <div class="helper mono">${target.number}</div>
       </div>
     `).join("")}
+  </div>
   `;
 }
 
@@ -456,11 +470,12 @@ function renderDetails() {
         ([key, value]) => `
       <div class="edit-field">
         <label>Key ${key}</label>
-        <input
+        <select
           class="di-input"
-          value="${value}"
           onchange="updateDtmf('${node.id}', '${key}', this.value)"
-        />
+        >
+          ${destinationOptions(value)}
+        </select>
       </div>
     `,
       )
@@ -1156,6 +1171,13 @@ function renderEditorShell() {
               <div class="panel-title">Graph Canvas</div>
               <div class="helper">Visual mock of the internal Call Flow model</div>
             </div>
+
+            <div class="zoom-controls">
+              <button class="di-btn di-btn-light" onclick="zoomGraphOut()">-</button>
+              <span class="mono">${Math.round(graphZoom * 100)}%</span>
+              <button class="di-btn di-btn-light" onclick="zoomGraphIn()">+</button>
+              <button class="di-btn di-btn-light" onclick="resetGraphZoom()">Reset</button>
+            </div>
           </div>
 
           <div class="graph-canvas" id="graphCanvas"></div>
@@ -1219,6 +1241,70 @@ function loadCallFlowLocally(companyId) {
 
 function clearCallFlowLocally(companyId) {
   localStorage.removeItem(getCallFlowStorageKey(companyId));
+}
+
+function setGraphZoom(nextZoom) {
+  graphZoom = Math.min(1.6, Math.max(0.5, nextZoom));
+  renderGraph();
+}
+
+function zoomGraphIn() {
+  setGraphZoom(graphZoom + 0.1);
+}
+
+function zoomGraphOut() {
+  setGraphZoom(graphZoom - 0.1);
+}
+
+function resetGraphZoom() {
+  setGraphZoom(1);
+}
+
+function itemKey(type, id) {
+  return type === "entry" ? entryKey() : `${type}:${id}`;
+}
+
+function firstValidationMessage(type, id) {
+  const key = itemKey(type, id);
+
+  const error = validationState.errors.find((item) => item.owner === key);
+  if (error) return `${error.code}: ${error.message}`;
+
+  const warning = validationState.warnings.find((item) => item.owner === key);
+  if (warning) return `${warning.code}: ${warning.message}`;
+
+  return "";
+}
+
+function validationTitle(type, id) {
+  const message = firstValidationMessage(type, id);
+  return message ? `title="${message.replaceAll('"', "&quot;")}"` : "";
+}
+
+function destinationOptions(selectedValue) {
+  const destinations = [
+    ...callFlow.nodes.map((node) => ({
+      value: node.id,
+      label: `${node.id} · ${node.label}`
+    })),
+    ...callFlow.targets.map((target) => ({
+      value: target.id,
+      label: `${target.id} · ${target.label}`
+    }))
+  ];
+
+  return destinations
+    .map(
+      (destination) => `
+        <option
+          value="${destination.value}"
+          ${destination.value === selectedValue ? "selected" : ""}
+        >
+          ${destination.label}
+        </option>
+      `
+    )
+    .join("");
 }
 
 render();

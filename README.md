@@ -144,14 +144,8 @@ Additionnal features can still be added
 
 Current work focuses on:
 
-- no features currently in developpement
-
----
-
-## Planned Features
-
-- EZVMS synchronization
-- Multi-language Support
+- Better endpoint features
+- EZVMS commits
 
 ---
 

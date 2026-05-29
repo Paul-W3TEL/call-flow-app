@@ -1173,10 +1173,9 @@ function renderEditorShell() {
             </div>
 
             <div class="zoom-controls">
-              <button class="di-btn di-btn-light" onclick="zoomGraphOut()">-</button>
-              <span class="mono">${Math.round(graphZoom * 100)}%</span>
               <button class="di-btn di-btn-light" onclick="zoomGraphIn()">+</button>
               <button class="di-btn di-btn-light" onclick="resetGraphZoom()">Reset</button>
+              <button class="di-btn di-btn-light" onclick="zoomGraphOut()">-</button>
             </div>
           </div>
 

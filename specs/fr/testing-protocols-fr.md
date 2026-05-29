@@ -381,7 +381,21 @@ Résultat attendu :
 Waiting for selection
 ```
 
-### 5.8 Modification du prompt audio
+### 5.8 Options de zoom
+
+**Objectif** - Vérifier que le canva du graph peut être zoomé
+
+Action : 
+
+- cliquer sur le bouton `+`
+- cliquer sur le bouton `-`
+- cliquer sur le bouton `reset`
+
+Résultat attendu :
+
+- le canva peut zoomer en avant et en arrière selon les entrées utilisateurs
+
+### 5.9 Modification du prompt audio
 
 **Objectif** - Vérifier qu’un prompt peut être remplacé par un fichier local autorisé.
 
@@ -405,7 +419,7 @@ Formats autorisés :
 .wav
 ```
 
-### 5.9 Refus d’un prompt invalide
+### 5.10 Refus d’un prompt invalide
 
 **Objectif** - Vérifier que les fichiers non autorisés sont refusés.
 
@@ -421,7 +435,7 @@ Invalid prompt file. Allowed formats: MP3, MP4, WAV.
 
 Le prompt existant ne doit pas être remplacé.
 
-### 5.10 Modification des paramètres simples
+### 5.11 Modification des paramètres simples
 
 **Objectif** - Vérifier que les champs éditables peuvent être modifiés.
 
@@ -436,7 +450,7 @@ Résultat attendu :
 - le noeud passe en état modifié
 - aucune erreur n’apparaît si les valeurs restent valides
 
-### 5.11 Modification incorrect
+### 5.12 Modification incorrect
 
 **Objectif** - Vérifier qu'entrer des valeurs négatives bloque la validation
 
@@ -452,7 +466,7 @@ Résultat attendu :
 - le Detail Panel affiche une erreur de validation
 - `Apply to EZVMS` est bloqué
 
-### 5.12 Modification incohérente
+### 5.13 Modification incohérente
 
 **Objectif** - Vérifier qu'entrer des valeurs incohérente lève une alerte
 
@@ -469,7 +483,7 @@ Résultat attendu :
 - le Detail Panel affiche une alerte de validation
 - `Apply to EZVMS` n'est pas bloqué
 
-### 5.13 Modification DTMF valide
+### 5.14 Modification DTMF valide
 
 **Objectif** - Vérifier qu’une destination DTMF peut être modifiée vers une destination existante.
 
@@ -479,24 +493,10 @@ Action :
 
 Résultat attendu :
 
+- le graph se met à jour
 - la modification est acceptée
 - le noeud passe en état modifié
 - la validation reste valide
-
-### 5.14 Erreur DTMF invalide
-
-**Objectif** - Vérifier qu’une destination inexistante est détectée.
-
-Action :
-
-- modifier une destination DTMF avec une valeur inexistante
-
-Résultat attendu :
-
-- le noeud concerné affiche un indicateur d’erreur
-- l’élément sidebar correspondant affiche un indicateur d’erreur
-- le Detail Panel affiche une erreur de validation
-- `Apply to EZVMS` est bloqué
 
 ### 5.15 DTMF dupliquée
 

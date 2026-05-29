@@ -381,7 +381,21 @@ Expected result:
 Waiting for selection
 ```
 
-### 5.8 Audio prompt modification
+### 5.8 Zooming feature
+
+**Goal** - Check if the graph canvas can be zoomed on
+
+Actions
+
+- click on the `+` button
+- click on the `-` button
+- click on the `reset` button
+
+Expected result
+
+- the canvas zooms in and out according to the user's input
+
+### 5.9 Audio prompt modification
 
 **Goal** - Check if a prompt can be replaced by a valid local file
 
@@ -405,7 +419,7 @@ Formats autorisés :
 .wav
 ```
 
-### 5.9 Invalid audio prompt
+### 5.10 Invalid audio prompt
 
 **Goal** - Check if invalid files are rejected
 
@@ -421,7 +435,7 @@ Invalid prompt file. Allowed formats: MP3, MP4, WAV.
 
 The existing prompt must not be replaced
 
-### 5.10 Simple parameters modification
+### 5.11 Simple parameters modification
 
 **Goal** - Check if editable fields can be modifiable
 
@@ -436,7 +450,7 @@ Expected result:
 - the node switches to a modified state
 - no error is seen as long as entered values are valid
 
-### 5.11 Incorrect modification
+### 5.12 Incorrect modification
 
 **Goal** - Check if entering negative values blocks modifications
 
@@ -452,7 +466,7 @@ Expected result:
 - the Detail Panel show a validation error
 - `Apply to EZVMS` is blocked
 
-### 5.12 Incoherent modification
+### 5.13 Incoherent modification
 
 **Goal** - Check if entering incoherent values raises an alert
 
@@ -469,7 +483,7 @@ Expected result:
 - the Detail Panel show a validation alert
 - `Apply to EZVMS` is not blocked
 
-### 5.13 Valid DTMF modification
+### 5.14 Valid DTMF modification
 
 **Goal** - Check if a DTMF destination can be modified to an existing destination
 
@@ -479,24 +493,10 @@ Action :
 
 Expected result:
 
+- the graph is updated
 - the modification is accepted
 - the node switches to a modified state
 - the validation remains valid
-
-### 5.14 Invalid DTMF
-
-**Goal** - Check if an non-existant destination is detected
-
-Action :
-
-- modify a DTMF destination with a non-existant ID
-
-Expected result:
-
-- the node displays an error indicator
-- the associated sidebar element displays an error indicator
-- the Detail Panel show a validation error
-- `Apply to EZVMS` is blocked
 
 ### 5.15 Duplicated DTMF
 

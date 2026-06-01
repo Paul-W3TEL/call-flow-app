@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import apiContract from "./api.json" with { type: "json" };
 
-import { getEzvmsCompany, getCompanyMenus } from "./ezvms/ezvmsClient.js";
+import { getEzvmsCompany, getCompanyMenus, modifyCompanyMenuFromNode } from "./ezvms/ezvmsClient.js";
 import { mapCompanyMenusToCallFlow  } from "./ezvms/ezvmsMapper.js";
 
 const app = express();
@@ -72,4 +72,35 @@ app.post("/api/call-flows/validate", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Call Flow API running on http://localhost:${port}`);
+});
+
+app.post("/api/call-flows/:companyId/apply", async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { nodes = [] } = req.body;
+
+    const results = [];
+
+    for (const node of nodes) {
+      const xml = await modifyCompanyMenuFromNode(companyId, node);
+
+      results.push({
+        node_id: node.id,
+        status: "sent",
+        raw: xml
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Sent modifs!",
+      results
+    });
+  } catch (error) {
+    res.status(502).json({
+      success: false,
+      error: "EZVMS_APPLY_FAILED",
+      message: error.message
+    });
+  }
 });

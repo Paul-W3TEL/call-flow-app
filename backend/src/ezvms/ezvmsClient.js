@@ -123,3 +123,26 @@ export async function getEzvmsCompany(companyId) {
     company_id: companyId
   });
 }
+
+export async function modifyCompanyMenuFromNode(companyId, node) {
+  const raw = node.ezvms || {};
+
+  const payload = {
+    ...raw,
+
+    company_id: companyId,
+    menu_id: node.id,
+
+    menu_desc: node.label,
+    main_prompt: node.prompt || null,
+    retry_cnt: node.settings?.retries ?? raw.retry_cnt,
+    noans_timeout: node.settings?.timeout ?? raw.noans_timeout
+  };
+
+  for (let i = 0; i <= 9; i++) {
+    const key = String(i);
+    payload[`key${key}_value`] = node.dtmf?.[key] || null;
+  }
+
+  return callEzvmsSoap("ModifyCompanyMenu", payload);
+}

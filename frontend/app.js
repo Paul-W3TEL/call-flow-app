@@ -465,21 +465,26 @@ function renderDetails() {
     <div class="detail-section">
       <div class="panel-title">DTMF Actions</div>
 
-    ${Object.entries(node.dtmf)
-      .map(
-        ([key, value]) => `
-      <div class="edit-field">
-        <label>Key ${key}</label>
-        <select
-          class="di-input"
-          onchange="updateDtmf('${node.id}', '${key}', this.value)"
-        >
-          ${destinationOptions(value)}
-        </select>
-      </div>
-    `,
-      )
-      .join("")}
+    ${Array.from({ length: 10 }, (_, index) => {
+      const key = String(index);
+      const value =
+        node.dtmf?.[key] ??
+        node.ezvms?.[`key${key}_value`] ??
+        "";
+
+      return `
+        <div class="edit-field">
+          <label>Key ${key}</label>
+
+          <select
+            class="di-input"
+            onchange="updateDtmf('${node.id}', '${key}', this.value)"
+          >
+            ${destinationOptions(value)}
+          </select>
+        </div>
+      `;
+    }).join("")}
   </div>
 
   <div class="detail-section">
@@ -580,10 +585,25 @@ function updateNodeField(nodeId, field, value) {
 
 function updateDtmf(nodeId, key, value) {
   const node = callFlow.nodes.find((item) => item.id === nodeId);
-
   if (!node) return;
 
-  node.dtmf[key] = value;
+  if (!node.dtmf) {
+    node.dtmf = {};
+  }
+
+  if (!value) {
+    delete node.dtmf[key];
+
+    if (node.ezvms) {
+      node.ezvms[`key${key}_value`] = null;
+    }
+  } else {
+    node.dtmf[key] = value;
+
+    if (node.ezvms) {
+      node.ezvms[`key${key}_value`] = value;
+    }
+  }
 
   modifiedItems.add(nodeKey(nodeId));
   saveCallFlowLocally();
@@ -651,29 +671,104 @@ function runManualValidation() {
   }
 }
 
-function applyToEzvms() {
-  const result = validateCallFlow();
-  render();
+async function applyToEzvms() {
+  validateCallFlow();
 
-  if (result.status === "invalid") {
-    alert("Cannot apply: blocking validation errors exist.");
+  if (validationState.errors.length > 0) {
+    alert("Cannot apply: blocking validation errors remain.");
     return;
   }
 
-  const confirmed = (result.status === "warning") ? confirm("Validation has found warnings that may block the application. Apply changes to EZVMS?")
-                                                  : confirm("Apply changes to EZVMS?");
+  const confirmed = confirm(
+    "Apply changes to EZVMS?\n\nThis will update the remote EZVMS configuration."
+  );
 
   if (!confirmed) return;
 
-  modifiedItems.clear();
-  clearCallFlowLocally(callFlow.company.company_id);
+  const modifiedNodes = callFlow.nodes
+    .filter((node) => modifiedItems.has(nodeKey(node.id)))
+    .map((node) => ({
+      ...node,
+      ezvms: {
+        ...node.ezvms,
+        menu_id: node.id,
+        menu_desc: node.label,
+        main_prompt: node.prompt,
+        retry_cnt: node.settings?.retries,
+        noans_timeout: node.settings?.timeout,
+        ...Object.fromEntries(
+          Array.from({ length: 10 }, (_, index) => {
+            const key = String(index);
+            return [`key${key}_value`, node.dtmf?.[key] || null];
+          })
+        )
+      }
+    }));
 
-  originalCallFlow = structuredClone(callFlow);
+  if (modifiedNodes.length === 0) {
+    alert("No modifications to apply.");
+    return;
+  }
 
-  validateCallFlow();
-  render();
+  try {
+    const requestPayload = {
+      company: callFlow.company,
+      entry_point: callFlow.entry_point,
+      nodes: modifiedNodes
+    };
 
-  alert("Sent modifs!");
+    console.log("Apply request payload:", requestPayload);
+    console.log("Apply request JSON:", JSON.stringify(requestPayload, null, 2));
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/call-flows/${encodeURIComponent(
+        callFlow.company.company_id
+      )}/apply`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestPayload)
+      }
+    );
+
+    const rawResponse = await response.text();
+
+    console.log("Apply raw response:", rawResponse);
+
+    let result;
+
+    try {
+      result = JSON.parse(rawResponse);
+    } catch {
+      throw new Error(
+        `Backend did not return JSON. HTTP ${response.status}. Response starts with: ${rawResponse.slice(
+          0,
+          200
+        )}`
+      );
+    }
+
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || "Apply failed");
+    }
+
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || "Apply failed");
+    }
+
+    modifiedItems.clear();
+    clearCallFlowLocally(callFlow.company.company_id);
+    originalCallFlow = structuredClone(callFlow);
+
+    validateCallFlow();
+    render();
+
+    alert("Modifications have been sent!");
+  } catch (error) {
+    alert(`Apply failed: ${error.message}`);
+  }
 }
 
 function linkKey(type, id) {
@@ -843,14 +938,6 @@ function validateCallFlow() {
           code: "InvalidDTMF",
           owner,
           message: `Invalid DTMF key: ${key}`,
-        });
-      }
-
-      if (!validDestinations.includes(destination)) {
-        errors.push({
-          code: "InvalidTarget",
-          owner,
-          message: `Invalid destination: ${destination}`,
         });
       }
 
@@ -1281,6 +1368,8 @@ function validationTitle(type, id) {
 }
 
 function destinationOptions(selectedValue) {
+  const normalizedValue = selectedValue ?? "";
+
   const destinations = [
     ...callFlow.nodes.map((node) => ({
       value: node.id,
@@ -1292,18 +1381,24 @@ function destinationOptions(selectedValue) {
     }))
   ];
 
-  return destinations
-    .map(
-      (destination) => `
-        <option
-          value="${destination.value}"
-          ${destination.value === selectedValue ? "selected" : ""}
-        >
-          ${destination.label}
-        </option>
-      `
-    )
-    .join("");
+  return `
+    <option value="" ${normalizedValue === "" ? "selected" : ""}>
+      -
+    </option>
+
+    ${destinations
+      .map(
+        (destination) => `
+          <option
+            value="${destination.value}"
+            ${String(destination.value) === String(normalizedValue) ? "selected" : ""}
+          >
+            ${destination.label}
+          </option>
+        `
+      )
+      .join("")}
+  `;
 }
 
 render();

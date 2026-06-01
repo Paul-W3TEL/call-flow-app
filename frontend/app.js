@@ -672,17 +672,15 @@ function runManualValidation() {
 }
 
 async function applyToEzvms() {
-  validateCallFlow();
+  const result = validateCallFlow();
 
-  if (validationState.errors.length > 0) {
+  if (result.status === "invalid") {
     alert("Cannot apply: blocking validation errors remain.");
     return;
   }
 
-  const confirmed = confirm(
-    "Apply changes to EZVMS?\n\nThis will update the remote EZVMS configuration."
-  );
-
+  const confirmed = (result.status === "warning") ? confirm("Validation has found warnings that may block the application. Apply changes to EZVMS?")
+                                                  : confirm("Apply changes to EZVMS?");
   if (!confirmed) return;
 
   const modifiedNodes = callFlow.nodes

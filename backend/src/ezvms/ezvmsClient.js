@@ -128,21 +128,48 @@ export async function modifyCompanyMenuFromNode(companyId, node) {
   const raw = node.ezvms || {};
 
   const payload = {
-    ...raw,
-
     company_id: companyId,
     menu_id: node.id,
 
-    menu_desc: node.label,
-    main_prompt: node.prompt || null,
-    retry_cnt: node.settings?.retries ?? raw.retry_cnt,
-    noans_timeout: node.settings?.timeout ?? raw.noans_timeout
+    description: node.label,
+    max_dtmf: raw.max_dtmf ?? "10",
+    retry_count: node.settings?.retries ?? raw.retry_cnt ?? "2",
+
+    main_prompt: node.prompt || raw.main_prompt || "",
+    retry_prompt: raw.retry_prompt || "",
+    invalid_prompt: raw.invalid_prompt || "",
+    ext_not_found_prompt: raw.ext_notfound_prompt || "",
+    transfer_prompt: raw.transfer_prompt || "",
+    default_leave_message_prompt: raw.default_leave_msg_prompt || "",
+    ext_no_vms_prompt: raw.ext_novms_prompt || "",
+
+    ext_busy_menu: raw.ext_busy_menu || "",
+    ext_no_answer_menu: raw.ext_noanswer_menu || "",
+    ext_unavailable_menu: raw.ext_unavailable_menu || "",
+    operator_busy_menu: raw.operator_busy_menu || "",
+
+    no_answer_timeout: node.settings?.timeout ?? raw.noans_timeout ?? "0",
+
+    x_position: node.position?.x ?? raw.xpos ?? "0",
+    y_position: node.position?.y ?? raw.ypos ?? "0",
+
+    remote_ip: process.env.EZVMS_REMOTE_IP || "127.0.0.1"
   };
 
   for (let i = 0; i <= 9; i++) {
-    const key = String(i);
-    payload[`key${key}_value`] = node.dtmf?.[key] || null;
+    const value = node.dtmf?.[String(i)] || "";
+
+    payload[`key${i}_action`] = value ? "5" : "0";
+    payload[`key${i}_action_value`] = value;
   }
 
-  return callEzvmsSoap("ModifyCompanyMenu", payload);
+  console.log("SOAP ModifyCompanyMenu payload:");
+  console.log(JSON.stringify(payload, null, 2));
+
+  const xml = await callEzvmsSoap("ModifyCompanyMenu", payload);
+
+  console.log("SOAP ModifyCompanyMenu response:");
+  console.log(xml);
+
+  return xml;
 }

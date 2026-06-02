@@ -96,7 +96,7 @@ All specifications are written in Markdown.
 - Operationnal JSON API, asbtracting SOAP complexity
 - Endpoints for recovery, validation and update of Call Flows
 - Link to fetch call flows and their menus from the Centrex
-- No current link to send the local modifications for EZVMS sync
+- Link to send the local modifications for EZVMS sync
 
 ### Frontend
 
@@ -145,7 +145,6 @@ Additionnal features can still be added
 Current work focuses on:
 
 - Better endpoint features
-- EZVMS commits
 
 ---
 

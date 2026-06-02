@@ -608,6 +608,8 @@ Expected result:
 Modifications have been sent!
 ```
 
+*Make sure to check the EZVMS Centrex to see if modifications were correctly applied*
+
 Warning case:
 
 - make a modification that raises a warning
@@ -626,6 +628,8 @@ Expected result:
 ```txt
 Modifications have been sent!
 ```
+
+*Make sure to check the EZVMS Centrex to see if modifications were correctly applied*
 
 Error case:
 

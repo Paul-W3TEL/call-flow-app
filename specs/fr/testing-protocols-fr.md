@@ -608,6 +608,8 @@ Résultat attendu :
 Modifications have been sent!
 ```
 
+*Pensez à vérifier le Centrex EZVMS pour voir si les modifications ont correctement été appliqués*
+
 Cas alerte :
 
 - effectuer une modification qui lève une alerte
@@ -626,6 +628,8 @@ Résultat attendu :
 ```txt
 Modifications have been sent!
 ```
+
+*Pensez à vérifier le Centrex EZVMS pour voir si les modifications ont correctement été appliqués*
 
 Cas erreur :
 

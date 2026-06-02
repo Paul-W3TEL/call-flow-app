@@ -719,9 +719,6 @@ async function applyToEzvms() {
       nodes: modifiedNodes
     };
 
-    console.log("Apply request payload:", requestPayload);
-    console.log("Apply request JSON:", JSON.stringify(requestPayload, null, 2));
-
     const response = await fetch(
       `${API_BASE_URL}/api/call-flows/${encodeURIComponent(
         callFlow.company.company_id
@@ -736,9 +733,6 @@ async function applyToEzvms() {
     );
 
     const rawResponse = await response.text();
-
-    console.log("Apply raw response:", rawResponse);
-
     let result;
 
     try {

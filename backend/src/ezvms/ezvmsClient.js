@@ -156,6 +156,5 @@ export async function modifyCompanyMenuFromNode(companyId, node) {
   payload["default_action"] = defaultVal ? "5" : "0";
   payload["default_action_value"] = defaultVal;
 
-  console.log("SOAP ModifyCompanyMenu comprehensive payload:", JSON.stringify(payload, null, 2));
   return await callEzvmsSoap("ModifyCompanyMenu", payload);
 }

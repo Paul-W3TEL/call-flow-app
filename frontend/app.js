@@ -416,6 +416,17 @@ function renderDetails() {
   if (selectedType === "node") {
     const node = callFlow.nodes.find((item) => item.id === selectedId);
 
+    const mappingKeys = [
+      { key: "0", label: "Key 0" }, { key: "1", label: "Key 1" },
+      { key: "2", label: "Key 2" }, { key: "3", label: "Key 3" },
+      { key: "4", label: "Key 4" }, { key: "5", label: "Key 5" },
+      { key: "6", label: "Key 6" }, { key: "7", label: "Key 7" },
+      { key: "8", label: "Key 8" }, { key: "9", label: "Key 9" },
+      { key: "*", label: "Key *" }, { key: "#", label: "Key #" },
+      { key: "default", label: "Default route" }
+    ];
+
+
     detail.innerHTML = `
     <div class="detail-section">
       <div class="panel-title">General</div>
@@ -463,29 +474,19 @@ function renderDetails() {
     </div>
 
     <div class="detail-section">
-      <div class="panel-title">DTMF Actions</div>
-
-    ${Array.from({ length: 10 }, (_, index) => {
-      const key = String(index);
-      const value =
-        node.dtmf?.[key] ??
-        node.ezvms?.[`key${key}_value`] ??
-        "";
-
-      return `
-        <div class="edit-field">
-          <label>Key ${key}</label>
-
-          <select
-            class="di-input"
-            onchange="updateDtmf('${node.id}', '${key}', this.value)"
-          >
-            ${destinationOptions(value)}
-          </select>
-        </div>
-      `;
-    }).join("")}
-  </div>
+      <div class="panel-title">DTMF & Fallback Actions</div>
+      ${mappingKeys.map((item) => {
+        const value = node.dtmf?.[item.key] ?? "";
+        return `
+          <div class="edit-field">
+            <label>${item.label}</label>
+            <select class="di-input" onchange="updateDtmf('${node.id}', '${item.key}', this.value)">
+              ${destinationOptions(value)}
+            </select>
+          </div>
+        `;
+      }).join("")}
+    </div>
 
   <div class="detail-section">
     <div class="panel-title">Validation</div>
@@ -699,7 +700,10 @@ async function applyToEzvms() {
             const key = String(index);
             return [`key${key}_value`, node.dtmf?.[key] || null];
           })
-        )
+        ),
+        "key_star_value": node.dtmf?.["*"] || null,
+        "key_hashtag_value": node.dtmf?.["#"] || null,
+        "default_action_value": node.dtmf?.["default"] || null
       }
     }));
 
@@ -931,6 +935,9 @@ function validateCallFlow() {
     }
 
     Object.entries(node.dtmf).forEach(([key, destination]) => {
+      if (key === "default") {
+        return; 
+      }
       if (!/^[0-9#*]$/.test(key)) {
         errors.push({
           code: "InvalidDTMF",

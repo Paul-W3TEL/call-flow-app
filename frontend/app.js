@@ -99,124 +99,7 @@ function renderSidebar() {
 }
 
 function renderGraph() {
-  const canvas = document.getElementById("graphCanvas");
-
-  const nodes = callFlow.nodes;
-  const targets = callFlow.targets;
-
-  const allIds = new Set([
-    "entry_point",
-    ...nodes.map((node) => node.id),
-    ...targets.map((target) => target.id)
-  ]);
-
-  const links = [];
-
-  if (allIds.has(callFlow.entry_point.start_node_id)) {
-    links.push({
-      from: "entry_point",
-      to: callFlow.entry_point.start_node_id,
-      label: "start"
-    });
-  }
-
-  nodes.forEach((node) => {
-    Object.entries(node.dtmf || {}).forEach(([key, destinationId]) => {
-      if (!allIds.has(destinationId)) return;
-
-      links.push({
-        from: node.id,
-        to: destinationId,
-        label: `DTMF ${key}`
-      });
-    });
-  });
-
-  const positions = computeGraphLayout(nodes, targets, links);
-
-  const maxX = Math.max(...Object.values(positions).map((p) => p.x));
-  const maxY = Math.max(...Object.values(positions).map((p) => p.y));
-
-  canvas.style.height = `${(maxY + 220) * graphZoom}px`;
-  canvas.style.minWidth = `${(maxX + 320) * graphZoom}px`;
-
-  canvas.innerHTML = `
-    <div
-      class="graph-zoom-layer"
-      style="
-        transform: scale(${graphZoom});
-        transform-origin: top left;
-        width: ${maxX + 320}px;
-        height: ${maxY + 220}px;
-      "
-    >
-    ${links.map((link, index) => {
-      const from = positions[link.from];
-      const to = positions[link.to];
-
-      if (!from || !to) return "";
-
-      return drawSmartLink(
-        from.x,
-        from.y,
-        to.x,
-        to.y,
-        210,
-        110,
-        link.label,
-        index
-      );
-    }).join("")}
-
-    <div
-      class="graph-node ${graphTypeClass("entry", "entry_point")} ${itemClasses("entry", "entry_point")}"
-      ${validationTitle("entry", "entry_point")}
-      data-link-key="${linkKey("entry", "entry_point")}"
-      style="left: ${positions.entry_point.x}px; top: ${positions.entry_point.y}px;"
-      onclick="selectItem('entry', 'entry_point')"
-      onmouseenter="setLinkedHover('entry', 'entry_point', true)"
-      onmouseleave="setLinkedHover('entry', 'entry_point', false)"
-    >
-      <div class="graph-title">Entry Point</div>
-      <div class="graph-id">${callFlow.entry_point.pilot_number}</div>
-      <div class="helper">Start node: ${callFlow.entry_point.start_node_id}</div>
-    </div>
-
-    ${nodes.map((node) => `
-      <div
-        class="graph-node ${graphTypeClass("node", node.type)} ${itemClasses("node", node.id)}"
-        ${validationTitle("node", node.id)}
-        data-link-key="${linkKey("node", node.id)}"
-        style="left: ${positions[node.id].x}px; top: ${positions[node.id].y}px;"
-        onclick="selectItem('node', '${node.id}')"
-        onmouseenter="setLinkedHover('node', '${node.id}', true)"
-        onmouseleave="setLinkedHover('node', '${node.id}', false)"
-      >
-        <div class="graph-title">${node.label}</div>
-        <div class="graph-id">${node.id}</div>
-        <div class="helper">${node.type}</div>
-        <div class="helper">Prompt: ${node.prompt || "None"}</div>
-      </div>
-    `).join("")}
-
-    ${targets.map((target) => `
-      <div
-        class="graph-node ${graphTypeClass("target", target.type)} ${itemClasses("target", target.id)}"
-        ${validationTitle("target", target.id)}
-        data-link-key="${linkKey("target", target.id)}"
-        style="left: ${positions[target.id].x}px; top: ${positions[target.id].y}px;"
-        onclick="selectItem('target', '${target.id}')"
-        onmouseenter="setLinkedHover('target', '${target.id}', true)"
-        onmouseleave="setLinkedHover('target', '${target.id}', false)"
-      >
-        <div class="graph-title">${target.label}</div>
-        <div class="graph-id">${target.id}</div>
-        <div class="helper">${target.type}</div>
-        <div class="helper mono">${target.number}</div>
-      </div>
-    `).join("")}
-  </div>
-  `;
+  window.renderReactFlowGraph(callFlow);
 }
 
 function computeGraphLayout(nodes, targets, links) {
@@ -587,25 +470,25 @@ function updateNodeField(nodeId, field, value) {
 function updateDtmf(nodeId, key, value) {
   const node = callFlow.nodes.find((item) => item.id === nodeId);
   if (!node) return;
-
-  if (!node.dtmf) {
-    node.dtmf = {};
-  }
+  if (!node.dtmf) node.dtmf = {};
 
   if (!value) {
     delete node.dtmf[key];
-
     if (node.ezvms) {
-      node.ezvms[`key${key}_value`] = null;
+      if (key === "default") node.ezvms["default_action_value"] = null;
+      else if (key === "*") node.ezvms["key_star_action_value"] = null;
+      else if (key === "#") node.ezvms["key_hashtag_action_value"] = null;
+      else node.ezvms[`key${key}_value`] = null;
     }
   } else {
     node.dtmf[key] = value;
-
     if (node.ezvms) {
-      node.ezvms[`key${key}_value`] = value;
+      if (key === "default") node.ezvms["default_action_value"] = value;
+      else if (key === "*") node.ezvms["key_star_action_value"] = value;
+      else if (key === "#") node.ezvms["key_hashtag_action_value"] = value;
+      else node.ezvms[`key${key}_value`] = value;
     }
   }
-
   modifiedItems.add(nodeKey(nodeId));
   saveCallFlowLocally();
   validateCallFlow();

@@ -46,7 +46,6 @@ export function mapCompanyMenusToCallFlow(apiResponse, companyId, sipExtension) 
 function mapDtmf(menu) {
   const dtmf = {};
 
-  // Map 0-9
   for (let i = 0; i <= 9; i++) {
     const value = menu[`key${i}_value`];
     if (value && value !== "string") {
@@ -54,10 +53,13 @@ function mapDtmf(menu) {
     }
   }
 
-  // Map special criteria records if they exist in the incoming object structure
   if (menu["key_star_action_value"]) dtmf["*"] = menu["key_star_action_value"];
   if (menu["key_hashtag_action_value"]) dtmf["#"] = menu["key_hashtag_action_value"];
-  if (menu["default_action_value"]) dtmf["default"] = menu["default_action_value"];
+  if (menu["default_action_value"]) {
+    dtmf["default"] = menu["default_action_value"];
+  } else if (menu["default_action_value_str"]) { 
+    dtmf["default"] = menu["default_action_value_str"];
+  }
 
   return dtmf;
 }

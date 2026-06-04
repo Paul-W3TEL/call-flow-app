@@ -119,61 +119,6 @@ function renderGraph() {
   window.renderReactFlowGraph(callFlow);
 }
 
-function computeGraphLayout(nodes, targets, links) {
-  const g = new dagre.graphlib.Graph();
-
-  g.setGraph({
-    rankdir: "LR",
-    nodesep: 90,
-    ranksep: 170,
-    marginx: 40,
-    marginy: 40
-  });
-
-  g.setDefaultEdgeLabel(() => ({}));
-
-  const nodeWidth = 210;
-  const nodeHeight = 110;
-
-  g.setNode("entry_point", {
-    width: nodeWidth,
-    height: nodeHeight
-  });
-
-  nodes.forEach((node) => {
-    g.setNode(node.id, {
-      width: nodeWidth,
-      height: nodeHeight
-    });
-  });
-
-  targets.forEach((target) => {
-    g.setNode(target.id, {
-      width: nodeWidth,
-      height: nodeHeight
-    });
-  });
-
-  links.forEach((link) => {
-    g.setEdge(link.from, link.to);
-  });
-
-  dagre.layout(g);
-
-  const positions = {};
-
-  g.nodes().forEach((id) => {
-    const layoutNode = g.node(id);
-
-    positions[id] = {
-      x: layoutNode.x - nodeWidth / 2,
-      y: layoutNode.y - nodeHeight / 2
-    };
-  });
-
-  return positions;
-}
-
 function renderDetails() {
   const detail = document.getElementById("detailContent");
 
@@ -936,49 +881,6 @@ function renderStatusBar() {
   }
 
   chip.classList.add("chip-ok");
-}
-
-function drawSmartLink(fromX, fromY, toX, toY, width, height, label, index) {
-  const startX = fromX + width;
-  const startY = fromY + height / 2;
-
-  const endX = toX;
-  const endY = toY + height / 2;
-
-  const midX = startX + (endX - startX) / 2;
-  const offset = (index % 4) * 10;
-
-  const path = `
-    M ${startX} ${startY}
-    C ${midX + offset} ${startY},
-      ${midX + offset} ${endY},
-      ${endX} ${endY}
-  `;
-
-  const labelX = midX + offset - 24;
-  const labelY = startY + (endY - startY) / 2 - 12;
-
-  return `
-    <svg
-      class="graph-link-layer"
-      style="
-        width: ${Math.max(startX, endX) + 400}px;
-        height: ${Math.max(startY, endY) + 400}px;
-      "
-    >
-      <path
-        d="${path}"
-        class="graph-link-path"
-      />
-    </svg>
-
-    <div
-      class="graph-dtmf"
-      style="left: ${labelX}px; top: ${labelY}px;"
-    >
-      ${label}
-    </div>
-  `;
 }
 
 function graphTypeClass(itemType, objectType) {

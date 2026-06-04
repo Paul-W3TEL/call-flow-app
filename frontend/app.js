@@ -23,6 +23,21 @@ let selectedId = null;
 let hoveredType = null;
 let hoveredId = null;
 
+let setHover = null
+let clearHover = null
+
+window.selectItem = selectItem;
+window.setHover = setHover;
+window.clearHover = clearHover;
+
+window.validationState = validationState;
+window.modifiedItems = modifiedItems;
+window.selectedType = selectedType;
+window.selectedId = selectedId;
+window.hoveredType = hoveredType;
+window.hoveredId = hoveredId;
+
+
 function render() {
   if (currentView === "selection") {
     renderSelectionPage();
@@ -99,6 +114,11 @@ function renderSidebar() {
 }
 
 function renderGraph() {
+  if (!window.renderReactFlowGraph) {
+    console.error("ReactFlow renderer is not loaded.");
+    return;
+  }
+
   window.renderReactFlowGraph(callFlow);
 }
 
@@ -1140,12 +1160,6 @@ function renderEditorShell() {
               <div class="panel-title">Graph Canvas</div>
               <div class="helper">Visual mock of the internal Call Flow model</div>
             </div>
-
-            <div class="zoom-controls">
-              <button class="di-btn di-btn-light" onclick="zoomGraphIn()">+</button>
-              <button class="di-btn di-btn-light" onclick="resetGraphZoom()">Reset</button>
-              <button class="di-btn di-btn-light" onclick="zoomGraphOut()">-</button>
-            </div>
           </div>
 
           <div class="graph-canvas" id="graphCanvas"></div>
@@ -1209,23 +1223,6 @@ function loadCallFlowLocally(companyId) {
 
 function clearCallFlowLocally(companyId) {
   localStorage.removeItem(getCallFlowStorageKey(companyId));
-}
-
-function setGraphZoom(nextZoom) {
-  graphZoom = Math.min(1.6, Math.max(0.5, nextZoom));
-  renderGraph();
-}
-
-function zoomGraphIn() {
-  setGraphZoom(graphZoom + 0.1);
-}
-
-function zoomGraphOut() {
-  setGraphZoom(graphZoom - 0.1);
-}
-
-function resetGraphZoom() {
-  setGraphZoom(1);
 }
 
 function itemKey(type, id) {

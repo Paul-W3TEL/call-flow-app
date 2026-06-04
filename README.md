@@ -54,9 +54,12 @@ Frontend Graph UI
 │       └── server.js
 │
 ├── frontend/
+│   ├── app.js
 │   ├── index.html
-│   ├── style.css
-│   └── app.js
+│   ├── package.json
+│   ├── src/
+│   │   └── reactFlowGraph.jsx
+│   └── style.css
 │
 ├── specs/
 │   ├── en/
@@ -103,6 +106,7 @@ All specifications are written in Markdown.
 - Interface connected to the backend internal API
 - Uses the given JSON model to generate a graphe and detail panels
 - Dynamic display of nodes, selection states, hover states and validation infos in real time
+- Display using the ReactFlow library
 - Modification of prompts and nodes parameters
 - Local memory storage before EZVMS commit
 
@@ -144,6 +148,7 @@ Additionnal features can still be added
 
 Current work focuses on:
 
+- New ReactFlow display
 - Better endpoint features
 
 ---

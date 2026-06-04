@@ -23,9 +23,6 @@ let selectedId = null;
 let hoveredType = null;
 let hoveredId = null;
 
-let setHover = null
-let clearHover = null
-
 window.selectItem = selectItem;
 window.setHover = setHover;
 window.clearHover = clearHover;
@@ -441,7 +438,12 @@ function row(label, value) {
 function selectItem(type, id) {
   selectedType = type;
   selectedId = id;
-  render();
+
+  window.selectedType = selectedType;
+  window.selectedId = selectedId;
+
+  renderSidebar();
+  renderDetails();
 }
 
 function itemClasses(type, id) {
@@ -1279,5 +1281,31 @@ function destinationOptions(selectedValue) {
       .join("")}
   `;
 }
+
+function setHover(type, id) {
+  hoveredType = type;
+  hoveredId = id;
+
+  window.hoveredType = hoveredType;
+  window.hoveredId = hoveredId;
+
+  renderSidebar();
+  window.renderReactFlowGraph(callFlow);
+}
+
+function clearHover() {
+  hoveredType = null;
+  hoveredId = null;
+
+  window.hoveredType = null;
+  window.hoveredId = null;
+
+  renderSidebar();
+  window.renderReactFlowGraph(callFlow);
+}
+
+window.setHover = setHover;
+window.clearHover = clearHover;
+window.selectItem = selectItem;
 
 render();

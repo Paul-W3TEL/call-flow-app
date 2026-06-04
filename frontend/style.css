@@ -699,3 +699,34 @@ body {
   content: "*";
   background: #3B82F6;
 }
+
+.rf-node-card {
+  position: relative;
+}
+
+.rf-status {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  border: 2px solid white;
+}
+
+.rf-status-error {
+  background: #D64545;
+}
+
+.rf-status-warning {
+  background: #E0A100;
+}
+
+.rf-hovered {
+  box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.35);
+}

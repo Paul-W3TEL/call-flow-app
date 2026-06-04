@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ReactFlow,
@@ -9,6 +9,7 @@ import {
   Position
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { useNodesState, useEdgesState } from "@xyflow/react";
 
 let savedViewport = null;
 
@@ -58,6 +59,12 @@ function FlowNode({ data }) {
     ].join(" ")}
     title={data.validationMessage || ""}
     >
+      {data.validationLevel === "error" && (
+        <div className="rf-status rf-status-error">!</div>
+      )}
+      {data.validationLevel === "warning" && (
+        <div className="rf-status rf-status-warning">!</div>
+      )}
       <Handle type="target" position={Position.Left} />
 
       <div className="rf-node-title">{data.label}</div>
@@ -187,13 +194,21 @@ function toReactFlow(callFlow) {
 }
 
 function ReactFlowGraph({ callFlow }) {
-  const { nodes, edges } = toReactFlow(callFlow);
+  const initial = useMemo(() => toReactFlow(callFlow), [callFlow]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
 
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodesDraggable={true}
+      nodesConnectable={false}
+      elementsSelectable={true}
       onNodeClick={(event, node) => {
         if (node.id === "entry_point") {
           window.selectItem("entry", "entry_point");
@@ -203,8 +218,9 @@ function ReactFlowGraph({ callFlow }) {
           window.selectItem("target", node.id);
         }
       }}
-      /*
       onNodeMouseEnter={(event, node) => {
+        if (!window.setHover) return;
+
         if (node.id === "entry_point") {
           window.setHover("entry", "entry_point");
         } else if (callFlow.nodes.some((item) => item.id === node.id)) {
@@ -214,9 +230,10 @@ function ReactFlowGraph({ callFlow }) {
         }
       }}
       onNodeMouseLeave={() => {
-        window.clearHover();
+        if (window.clearHover) {
+          window.clearHover();
+        }
       }}
-        */
     >
       <Background />
       <Controls />
@@ -225,12 +242,17 @@ function ReactFlowGraph({ callFlow }) {
   );
 }
 
+let reactFlowRoot = null;
+let lastContainer = null;
+
 window.renderReactFlowGraph = function renderReactFlowGraph(callFlow) {
   const container = document.getElementById("graphCanvas");
   if (!container || !callFlow) return;
 
-  container.innerHTML = "";
+  if (container !== lastContainer) {
+    reactFlowRoot = createRoot(container);
+    lastContainer = container;
+  }
 
-  const root = createRoot(container);
-  root.render(<ReactFlowGraph callFlow={callFlow} />);
+  reactFlowRoot.render(<ReactFlowGraph callFlow={callFlow} />);
 };

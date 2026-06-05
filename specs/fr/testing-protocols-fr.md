@@ -660,7 +660,30 @@ Résultat attendu :
 - Le noeud bascule instantanément en état modifié : une bordure en pointillés habille le bloc du Graph Canvas ainsi que le bouton correspondant dans la Sidebar.
 - L'arborescence globale intègre la valeur révisée, et l'identifiant technique de suivi est poussé au sein de la collection d'indexation `modifiedItems`.
 
-### 5.22 Persistance du Brouillon Client
+### 5.22 Réduction des panels
+
+**Objectif** - Vérifier si les panels peuvent être réduit pour libérer de la place
+
+Actions:
+
+- Sélectionner un objet, depuis la Sidebar ou le Graph Canva
+- Dans le panneau des détails, choisir un panel et cliquer sur le boutton `-` à côté de son nom
+
+Résultat attendu:
+
+- Le panel se réduit, ne laissant que le nom du panel visible
+- Le boutton `-` devient un boutton `+`
+
+Actions:
+
+- Cliquer sur le boutton `+` du même panel
+
+Résultat attendu:
+
+- Le panel revients à sa forme d'origine
+- Le boutton `+` devient un boutton `-`
+
+### 5.23 Persistance du Brouillon Client
 
 **Objectif** – Vérifier qu'un brouillon de modification non publié est automatiquement préservé sur le stockage navigateur et survit à un rechargement accidentel de page.
 
@@ -678,7 +701,7 @@ Résultat attendu :
 - L'habillage graphique en pointillés des blocs modifiés reste actif, démontrant la bonne restauration de l'état de session.
 - Les déplacement des blocs du graph sont conservé
 
-### 5.23 Invalidation du Cache (Refresh)
+### 5.24 Invalidation du Cache (Refresh)
 
 **Objectif** – Vérifier que l'activation du rafraîchissement manuel écrase le stockage temporaire local et réinitialise l'application sur les données serveur distantes.
 
@@ -694,7 +717,7 @@ Résultat attendu :
 - L'application relance une transaction HTTP GET distante vers l'API centrale sur la route `/api/call-flows/:companyId/`.
 - L'index technique de modification locale est intégralement réinitialisé, provoquant le retour au style graphique nominal sans pointillés.
 
-### 5.24 Validation Distante
+### 5.25 Validation Distante
 
 **Objectif** – Vérifier que les tables de stockage temporaire local sont supprimé une fois les modifications appliquées vers le moteur distant.
 

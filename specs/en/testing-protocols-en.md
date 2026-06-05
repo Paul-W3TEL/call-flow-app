@@ -660,7 +660,30 @@ Expected Result:
 - The altered node instantly shifts to a modified state, applying a dashed border style to both its Graph Node box and its corresponding Sidebar component.
 - The global data structure preserves the update in memory
 
-### 5.22 Local Client-Side Draft Persistence
+### 5.22 Panel collapsing
+
+**Goal** - Check if panels can be collapsed to free up space
+
+Actions:
+
+- Select an object, either through the sidebar or the graph canvas
+- In the detail panel, chose a panel and click the `-` button next to its name
+
+Expected Result:
+
+- The panel collapses, leaving only the name of the panel visible
+- The `-` button turns into a `+` button
+
+Actions:
+
+- Click the `+` button of the same panel
+
+Expected Result:
+
+- The panel reverts to its original form
+- The `+` button turns into a `-` button
+
+### 5.23 Local Client-Side Draft Persistence
 
 **Goal** - Check if unsaved call flow mutations automatically mirror to browser storage and survive accidental page refreshes.
 
@@ -678,7 +701,7 @@ Expected Result:
 - Dashed modification borders remain present on all altered nodes, demonstrating proper state recovery.
 - Block movements are retained
 
-### 5.23 Cache Refresh
+### 5.24 Cache Refresh
 
 **Goal** - Check if choosing to manually synchronize remote data drops current local storage structures and resets client tracking back to ground truth.
 
@@ -694,7 +717,7 @@ Expected Result:
 - The application executes an HTTP GET transaction to the base API endpoint routing path (`/api/call-flows/:companyId/`).
 - The `modifiedItems` selection registry drops all active tokens, removing dashed borders across UI components.
 
-### 5.24 Cache Clearance Post Apply Transaction
+### 5.25 Cache Clearance Post Apply Transaction
 
 **Goal** - Check if local memory records and serialized web databases clear cleanly once mutations successfully commit to the core engine platform.
 

@@ -148,8 +148,8 @@ Additionnal features can still be added
 
 Current work focuses on:
 
+- Commit history feature
 - Better endpoint features
-- QoL detail panel features
 
 ---
 

@@ -23,9 +23,6 @@ let selectedId = null;
 let hoveredType = null;
 let hoveredId = null;
 
-// ─── panel collapse state ─────────────────────────────────────────────────────
-// Keyed by panel title string. Persists in localStorage across selections,
-// call flow changes, and page refreshes. Cleared by refreshData().
 const PANELS_STORAGE_KEY = "diamy.collapsedPanels";
 
 let collapsedPanels = {};
@@ -54,10 +51,6 @@ function togglePanel(name) {
   renderDetails();
 }
 
-// Wrap a detail-section with a collapsible header.
-// name   – stable key used for storage (usually the panel title text)
-// title  – display text shown in the header
-// body   – inner HTML shown when expanded
 function detailSection(name, title, body) {
   const collapsed = !!collapsedPanels[name];
   const icon = collapsed ? "+" : "−";

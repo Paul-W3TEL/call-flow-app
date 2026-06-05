@@ -288,9 +288,6 @@ html, body {
 .detail-section-header .panel-title {
   margin-bottom: 0;
 }
-.detail-section-collapsed .detail-section-header {
-  /* no bottom margin when collapsed — body is hidden */
-}
 .detail-section-body {
   margin-top: var(--space-3);
 }

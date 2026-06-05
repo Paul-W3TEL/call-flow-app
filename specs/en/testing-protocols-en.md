@@ -11,13 +11,14 @@
 
 ## Version history
 
-| Version | Date          | Author      | Description                    |
-| ------- | ------------- | ----------- | ------------------------------ |
-| 1.0     | May 11th 2026 | Paul Koster | Initial version                |
-| 1.1     | May 11th 2026 | Paul Koster | API testing protocols          |
-| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols     |
-| 1.3     | May 28th 2026 | Paul Koster | Testing for the full app       |
-| 1.4     | May 28th 2026 | Paul Koster | Local memory testing protocols |
+| Version | Date          | Author      | Description                           |
+| ------- | ------------- | ----------- | ------------------------------------- |
+| 1.0     | May 11th 2026 | Paul Koster | Initial version                       |
+| 1.1     | May 11th 2026 | Paul Koster | API testing protocols                 |
+| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols            |
+| 1.3     | May 28th 2026 | Paul Koster | Testing for the full app              |
+| 1.4     | May 28th 2026 | Paul Koster | Local memory testing protocols        |
+| 1.5     | June 5th 2026 | Paul Koster | Testing for the new ReactFlow display |
 
 ------
 

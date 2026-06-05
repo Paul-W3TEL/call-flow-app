@@ -381,19 +381,20 @@ Expected result:
 Waiting for selection
 ```
 
-### 5.8 Zooming feature
+### 5.8 Movement features
 
-**Goal** - Check if the graph canvas can be zoomed on
+**Goal** - Check if the graph canvas can be zoomed on and the blocks can be moved around
 
 Actions
 
-- click on the `+` button
-- click on the `-` button
-- click on the `reset` button
+- use the scroll of the mouse to zoom in and out of the graph
+- move blocks around by dragging them
 
 Expected result
 
 - the canvas zooms in and out according to the user's input
+- blocks move around following the mouse
+- links between blocks adapt to these movements
 
 ### 5.9 Audio prompt modification
 
@@ -674,6 +675,7 @@ Expected Result:
 - Upon modification, `localStorage` must instantly contain a serialized JSON payload carrying the mutated `callFlow` tree alongside an array representing `modifiedItems`.
 - Following page reloading and re-selection of the company, the application bypasses remote server queries and restores state instantly from local disk memory.
 - Dashed modification borders remain present on all altered nodes, demonstrating proper state recovery.
+- Block movements are retained
 
 ### 5.23 Cache Refresh
 

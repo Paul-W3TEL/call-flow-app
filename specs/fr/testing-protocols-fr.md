@@ -381,19 +381,20 @@ Résultat attendu :
 Waiting for selection
 ```
 
-### 5.8 Options de zoom
+### 5.8 Options de déplacement
 
-**Objectif** - Vérifier que le canva du graph peut être zoomé
+**Objectif** - Vérifier que le canva du graph peut être zoomé et que les éléments peuvent être déplacé
 
 Action : 
 
-- cliquer sur le bouton `+`
-- cliquer sur le bouton `-`
-- cliquer sur le bouton `reset`
+- utiliser la molette de la souris pour zoomer et dézoomer le graph
+- déplacer des blocs en les glissant
 
 Résultat attendu :
 
 - le canva peut zoomer en avant et en arrière selon les entrées utilisateurs
+- les blocs se déplacent en suivant la souris
+- les liens entre blocs s'adaptent à ces déplacements
 
 ### 5.9 Modification du prompt audio
 
@@ -674,6 +675,7 @@ Résultat attendu :
 - Dès la modification d'un champ, le `localStorage` doit contenir l'objet JSON sérialisé incluant l'arbre `callFlow` modifié et la liste d'éléments `modifiedItems`.
 - Après rechargement et re-sélection, l'application court-circuite l'appel serveur réseau et charge les données directement depuis la mémoire du disque local client.
 - L'habillage graphique en pointillés des blocs modifiés reste actif, démontrant la bonne restauration de l'état de session.
+- Les déplacement des blocs du graph sont conservé
 
 ### 5.23 Invalidation du Cache (Refresh)
 

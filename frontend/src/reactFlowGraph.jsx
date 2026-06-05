@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ReactFlow,
@@ -11,119 +11,73 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useNodesState, useEdgesState } from "@xyflow/react";
 
-let savedViewport = null;
-
-function getNodeKind(item) {
-  if (item.kind) return item.kind;
-  if (item.type) return item.type;
-  return "unknown";
-}
-
 function getValidationLevel(type, id) {
   if (!window.validationState) return "";
-
-  const owner =
-    type === "entry"
-      ? "entry:entry_point"
-      : `${type}:${id}`;
-
-  if (window.validationState.errors?.some((item) => item.owner === owner)) {
-    return "error";
-  }
-
-  if (window.validationState.warnings?.some((item) => item.owner === owner)) {
-    return "warning";
-  }
-
+  const owner = type === "entry" ? "entry:entry_point" : `${type}:${id}`;
+  if (window.validationState.errors?.some((item) => item.owner === owner)) return "error";
+  if (window.validationState.warnings?.some((item) => item.owner === owner)) return "warning";
   return "";
 }
 
 function isModified(type, id) {
-  const owner =
-    type === "entry"
-      ? "entry:entry_point"
-      : `${type}:${id}`;
+  const owner = type === "entry" ? "entry:entry_point" : `${type}:${id}`;
+  return window.modifiedItems?.has?.(owner) ?? false;
+}
 
-  return window.modifiedItems?.has?.(owner);
+function getFirstValidationMessage(type, id) {
+  if (!window.validationState) return "";
+  const owner = type === "entry" ? "entry:entry_point" : `${type}:${id}`;
+  const error = window.validationState.errors?.find((item) => item.owner === owner);
+  if (error) return `${error.code}: ${error.message}`;
+  const warning = window.validationState.warnings?.find((item) => item.owner === owner);
+  if (warning) return `${warning.code}: ${warning.message}`;
+  return "";
 }
 
 function FlowNode({ data }) {
   return (
-    <div className={[
-      "rf-node-card",
-      `rf-node-${data.category}`,
-      `rf-type-${data.type}`,
-      data.selected ? "rf-selected" : "",
-      data.modified ? "rf-modified" : "",
-      data.validationLevel ? `rf-${data.validationLevel}` : ""
-    ].join(" ")}
-    title={data.validationMessage || ""}
+    <div
+      className={[
+        "rf-node-card",
+        `rf-node-${data.category}`,
+        `rf-type-${data.type}`,
+        data.selected   ? "rf-selected"              : "",
+        data.modified   ? "rf-modified"              : "",
+        data.validationLevel ? `rf-${data.validationLevel}` : ""
+      ].filter(Boolean).join(" ")}
+      title={data.validationMessage || ""}
+      data-link-key={data.linkKey}
     >
-      {data.validationLevel === "error" && (
-        <div className="rf-status rf-status-error">!</div>
-      )}
-      {data.validationLevel === "warning" && (
-        <div className="rf-status rf-status-warning">!</div>
-      )}
+      {data.validationLevel === "error"   && <div className="rf-status rf-status-error">!</div>}
+      {data.validationLevel === "warning" && <div className="rf-status rf-status-warning">⚠</div>}
       <Handle type="target" position={Position.Left} />
-
       <div className="rf-node-title">{data.label}</div>
       <div className="rf-node-id">{data.id}</div>
       <div className="rf-node-type">{data.type}</div>
       {data.extra && <div className="rf-node-extra">{data.extra}</div>}
-
       <Handle type="source" position={Position.Right} />
     </div>
   );
 }
 
-const nodeTypes = {
-  flowNode: FlowNode
-};
-
-function getFirstValidationMessage(type, id) {
-  if (!window.validationState) return "";
-
-  const owner =
-    type === "entry"
-      ? "entry:entry_point"
-      : `${type}:${id}`;
-
-  const error = window.validationState.errors?.find(
-    (item) => item.owner === owner
-  );
-
-  if (error) return `${error.code}: ${error.message}`;
-
-  const warning = window.validationState.warnings?.find(
-    (item) => item.owner === owner
-  );
-
-  if (warning) return `${warning.code}: ${warning.message}`;
-
-  return "";
-}
+const nodeTypes = { flowNode: FlowNode };
 
 function toReactFlow(callFlow) {
   const nodes = [
     {
       id: "entry_point",
       type: "flowNode",
-      position: { x: 0, y: 200 },
+      position: callFlow.entry_point.position || { x: 0, y: 200 },
       data: {
         id: callFlow.entry_point.pilot_number,
         label: "Entry Point",
         type: "entry_point",
         category: "entry",
         extra: `Start: ${callFlow.entry_point.start_node_id}`,
-        selected:
-          window.selectedType === "entry" &&
-          window.selectedId === "entry_point",
-        hovered:
-          window.hoveredType === "entry" &&
-          window.hoveredId === "entry_point",
+        linkKey: "entry:entry_point",
+        selected: window.selectedType === "entry" && window.selectedId === "entry_point",
         modified: isModified("entry", "entry_point"),
-        validationLevel: getValidationLevel("entry", "entry_point"),
+        validationLevel:   getValidationLevel("entry", "entry_point"),
         validationMessage: getFirstValidationMessage("entry", "entry_point")
       }
     },
@@ -137,14 +91,10 @@ function toReactFlow(callFlow) {
         type: node.type || "node",
         category: "node",
         extra: node.prompt ? `Prompt: ${node.prompt}` : "",
-        selected:
-          window.selectedType === "node" &&
-          window.selectedId === node.id,
-        hovered:
-          window.hoveredType === "node" &&
-          window.hoveredId === node.id,
+        linkKey: `node:${node.id}`,
+        selected: window.selectedType === "node" && window.selectedId === node.id,
         modified: isModified("node", node.id),
-        validationLevel: getValidationLevel("node", node.id),
+        validationLevel:   getValidationLevel("node", node.id),
         validationMessage: getFirstValidationMessage("node", node.id)
       }
     })),
@@ -158,14 +108,10 @@ function toReactFlow(callFlow) {
         type: target.type || "target",
         category: "target",
         extra: target.number || "",
-        selected:
-          window.selectedType === "target" &&
-          window.selectedId === target.id,
-        hovered:
-          window.hoveredType === "target" &&
-          window.hoveredId === target.id,
+        linkKey: `target:${target.id}`,
+        selected: window.selectedType === "target" && window.selectedId === target.id,
         modified: isModified("target", target.id),
-        validationLevel: getValidationLevel("target", target.id),
+        validationLevel:   getValidationLevel("target", target.id),
         validationMessage: getFirstValidationMessage("target", target.id)
       }
     }))
@@ -193,46 +139,86 @@ function toReactFlow(callFlow) {
   return { nodes, edges };
 }
 
-function ReactFlowGraph({ callFlow }) {
-  const initial = useMemo(() => toReactFlow(callFlow), [callFlow]);
+function ReactFlowGraph({ callFlow, version }) {
+  const callFlowRef = useRef(callFlow);
 
+  // Build initial node/edge set once on mount
+  const initial = useMemo(() => toReactFlow(callFlow), []);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+
+  useEffect(() => { callFlowRef.current = callFlow; }, [callFlow]);
+
+  useEffect(() => {
+    const updated = toReactFlow(callFlowRef.current);
+    setNodes((prevNodes) =>
+      updated.nodes.map((updatedNode) => {
+        const existing = prevNodes.find((n) => n.id === updatedNode.id);
+        if (existing) {
+          updatedNode.position = existing.position;
+        }
+        return updatedNode;
+      })
+    );
+    setEdges(updated.edges);
+  }, [version]);
+
+  const saveTimer = useRef(null);
+
+  const handleNodesChange = (changes) => {
+    const filtered = changes.filter((c) => c.type !== "select");
+    onNodesChange(filtered);
+
+    changes.forEach((change) => {
+      if (change.type === "position" && change.position) {
+        const cf = callFlowRef.current;
+        if (change.id === "entry_point") {
+          cf.entry_point.position = change.position;
+        } else {
+          const node = cf.nodes?.find((n) => n.id === change.id);
+          if (node) node.position = change.position;
+          const target = cf.targets?.find((t) => t.id === change.id);
+          if (target) target.position = change.position;
+        }
+
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(() => {
+          if (window.saveCallFlowLocally) window.saveCallFlowLocally();
+        }, 400);
+      }
+    });
+  };
 
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
-      onNodesChange={onNodesChange}
+      onNodesChange={handleNodesChange}
       onEdgesChange={onEdgesChange}
       nodesDraggable={true}
       nodesConnectable={false}
-      elementsSelectable={true}
+      elementsSelectable={false}
       onNodeClick={(event, node) => {
+        event.stopPropagation();
         if (node.id === "entry_point") {
           window.selectItem("entry", "entry_point");
-        } else if (callFlow.nodes.some((item) => item.id === node.id)) {
+        } else if (callFlowRef.current.nodes.some((n) => n.id === node.id)) {
           window.selectItem("node", node.id);
         } else {
           window.selectItem("target", node.id);
         }
       }}
+      onPaneClick={() => {
+      }}
       onNodeMouseEnter={(event, node) => {
-        if (!window.setHover) return;
-
-        if (node.id === "entry_point") {
-          window.setHover("entry", "entry_point");
-        } else if (callFlow.nodes.some((item) => item.id === node.id)) {
-          window.setHover("node", node.id);
-        } else {
-          window.setHover("target", node.id);
-        }
+        let type = "target";
+        if (node.id === "entry_point") type = "entry";
+        else if (callFlowRef.current.nodes.some((n) => n.id === node.id)) type = "node";
+        if (window.setHover) window.setHover(type, node.id);
       }}
       onNodeMouseLeave={() => {
-        if (window.clearHover) {
-          window.clearHover();
-        }
+        if (window.clearHover) window.clearHover();
       }}
     >
       <Background />
@@ -244,15 +230,17 @@ function ReactFlowGraph({ callFlow }) {
 
 let reactFlowRoot = null;
 let lastContainer = null;
+let renderVersion = 0;
 
 window.renderReactFlowGraph = function renderReactFlowGraph(callFlow) {
   const container = document.getElementById("graphCanvas");
   if (!container || !callFlow) return;
 
-  if (container !== lastContainer) {
+  if (!reactFlowRoot || container !== lastContainer) {
     reactFlowRoot = createRoot(container);
     lastContainer = container;
   }
 
-  reactFlowRoot.render(<ReactFlowGraph callFlow={callFlow} />);
+  renderVersion += 1;
+  reactFlowRoot.render(<ReactFlowGraph callFlow={callFlow} version={renderVersion} />);
 };

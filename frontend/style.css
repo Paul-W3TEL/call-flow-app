@@ -1,6 +1,4 @@
-/* ==========================================================================
-   1. DESIGN SYSTEM VARIABLES & ROOT STYLES
-   ========================================================================== */
+
 :root {
   --p100: #e0f4f3;
   --p500: #3d8b88;
@@ -52,9 +50,6 @@ html, body {
   color: var(--text-primary);
 }
 
-/* ==========================================================================
-   2. APPLICATION SHELL LAYOUT
-   ========================================================================== */
 .app-shell {
   height: 100vh;
   min-height: 100vh;
@@ -97,9 +92,6 @@ html, body {
   overflow: hidden;
 }
 
-/* ==========================================================================
-   3. REUSABLE FORM ELEMENTS & UI COMPONENT UTILITIES
-   ========================================================================== */
 .mono { font-family: "IBM Plex Mono", monospace; }
 .brand { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; }
 .brand span { color: var(--p500); }
@@ -153,9 +145,6 @@ html, body {
 .chip-info { background: rgba(213, 164, 58, 0.12); color: var(--info); border: 1px solid rgba(213, 190, 58, 0.3); }
 .chip-warn { background: rgba(245, 35, 35, 0.12); color: var(--warning); border: 1px solid rgba(245, 35, 35, 0.3); }
 
-/* ==========================================================================
-   4. SIDEBAR & CONTROL PANEL VIEWS
-   ========================================================================== */
 .sidebar, .detail-panel {
   height: 100%;
   min-height: 0;
@@ -183,9 +172,6 @@ html, body {
 .list-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 13px; }
 .list-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-/* ==========================================================================
-   5. CENTRAL CANVAS / REACTFLOW NODES
-   ========================================================================== */
 .canvas-panel {
   height: 100%;
   min-height: 0;
@@ -225,10 +211,6 @@ html, body {
   z-index: 6;
 }
 
-/* ==========================================================================
-   6. UNIFIED APPLICATION HOVER, MODIFICATION, AND WARNING STATES
-   ========================================================================== */
-/* Master Transitions */
 .list-item,
 .rf-node-card {
   transition:
@@ -238,9 +220,9 @@ html, body {
     transform 150ms ease;
 }
 
-/* Unified Hover State across Sidebar and Canvas Component Blocks */
 .list-item:hover,
 .list-item.hover-linked,
+.rf-node-card.hover-linked,
 .rf-node-card:hover,
 .rf-node-card.rf-hovered {
   border-color: var(--warning) !important;
@@ -250,8 +232,8 @@ html, body {
     0 8px 20px rgba(15, 23, 42, 0.12) !important;
 }
 
-/* Unified Active State */
 .list-item.active,
+.react-flow__node.selected .rf-node-card,
 .rf-node-card.rf-selected {
   border-color: var(--p500) !important;
   background-color: var(--p100) !important;
@@ -260,17 +242,14 @@ html, body {
     0 0 18px rgba(61, 139, 136, 0.35) !important; 
 }
 
-/* Unified Layout Modifications (Dotted Border Variant) */
 .list-item.modified,
 .rf-node-card.rf-modified {
   border-style: dashed !important;
 }
 
-/* Inline Validation Strings for Forms */
 .validation-warning { color: var(--warning); font-size: 12px; margin-top: 6px; }
 .validation-error { color: var(--error); font-size: 12px; margin-top: 6px; }
 
-/* Dynamic Layout Badges for Canvas Status Pills & Sidebar Pseudo Elements */
 .rf-status,
 .list-item.has-error::after,
 .list-item.has-warning::after {
@@ -291,26 +270,18 @@ html, body {
   z-index: 10;
 }
 
-/* Sidebar Specific Badging Placements */
 .list-item.has-error::after { content: "!"; background: var(--error); top: -7px; right: -7px; width: 18px; height: 18px; font-size: 11px;}
 .list-item.has-warning::after { content: "⚠"; background: var(--warning); top: -7px; right: -7px; width: 18px; height: 18px; font-size: 11px;}
 
-/* ReactFlow Status Badge Specific Overrides */
 .rf-status-error { background-color: var(--error) !important; }
 .rf-status-warning { background-color: var(--warning) !important; }
 
-/* ==========================================================================
-   7. DETAIL PANEL AND DATA LAYOUTS
-   ========================================================================== */
 .detail-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-3); }
 .detail-row { display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--border); }
 .detail-row:last-child { border-bottom: none; }
 .detail-label { font-family: "Space Grotesk", sans-serif; font-size: 12px; color: var(--text-muted); }
 .detail-value { font-family: "IBM Plex Mono", monospace; font-size: 12px; text-align: right; }
 
-/* ==========================================================================
-   8. INDEX SELECTION HUB PAGE & FULLSCREEN NOTICES
-   ========================================================================== */
 .selection-page { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; }
 .selection-card { width: 720px; max-width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-card); }
 .flow-list { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
@@ -320,9 +291,6 @@ html, body {
 .flow-meta { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
 .fullscreen-message { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-/* ==========================================================================
-   9. BRAND CATEGORY NODE COLORS (ReactFlow Structural Borders)
-   ========================================================================== */
 .rf-type-entry_point { border-color: #4CAF50; }
 .rf-type-menu        { border-color: #3FA99C; }
 .rf-type-transfer    { border-color: #2F8F83; }

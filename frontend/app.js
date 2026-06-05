@@ -34,14 +34,15 @@ window.selectedId = selectedId;
 window.hoveredType = hoveredType;
 window.hoveredId = hoveredId;
 
-
 function render() {
   if (currentView === "selection") {
     renderSelectionPage();
     return;
   }
 
-  renderEditorShell();
+  if (!document.getElementById("graphCanvas")) {
+    renderEditorShell();
+  }
 
   if (!callFlow) return;
 
@@ -61,6 +62,8 @@ function renderSidebar() {
   const entryPointItem = document.getElementById("entryPointItem");
   const nodeList = document.getElementById("nodeList");
   const targetList = document.getElementById("targetList");
+
+  if (!entryPointItem) return;
 
   entryPointItem.innerHTML = `
   <div
@@ -388,6 +391,7 @@ function selectItem(type, id) {
   window.selectedId = selectedId;
 
   renderSidebar();
+  renderGraph();
   renderDetails();
 }
 
@@ -429,9 +433,13 @@ function updateNodeField(nodeId, field, value) {
   }
 
   modifiedItems.add(nodeKey(nodeId));
+  window.modifiedItems = modifiedItems;
   saveCallFlowLocally();
   validateCallFlow();
-  render();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
 }
 
 function updateDtmf(nodeId, key, value) {
@@ -457,9 +465,13 @@ function updateDtmf(nodeId, key, value) {
     }
   }
   modifiedItems.add(nodeKey(nodeId));
+  window.modifiedItems = modifiedItems;
   saveCallFlowLocally();
   validateCallFlow();
-  render();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
 }
 
 function updatePromptFile(nodeId, file) {
@@ -480,7 +492,9 @@ function updatePromptFile(nodeId, file) {
       message: "Invalid prompt file. Allowed formats: MP3, MP4, WAV.",
     });
 
-    render();
+    renderSidebar();
+    renderGraph();
+    renderStatusBar();
     alert("Invalid prompt file. Allowed formats: MP3, MP4, WAV.");
     return;
   }
@@ -488,9 +502,13 @@ function updatePromptFile(nodeId, file) {
   node.prompt = file.name;
 
   modifiedItems.add(nodeKey(nodeId));
+  window.modifiedItems = modifiedItems;
   saveCallFlowLocally();
   validateCallFlow();
-  render();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
 }
 
 async function refreshData() {
@@ -511,7 +529,9 @@ async function refreshData() {
 
 function runManualValidation() {
   const result = validateCallFlow();
-  render();
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
 
   if (result.status === "valid") {
     alert("Validation passed.");
@@ -600,16 +620,15 @@ async function applyToEzvms() {
       throw new Error(result.message || "Apply failed");
     }
 
-    if (!response.ok || result.success === false) {
-      throw new Error(result.message || "Apply failed");
-    }
-
     modifiedItems.clear();
+    window.modifiedItems = modifiedItems;
     clearCallFlowLocally(callFlow.company.company_id);
     originalCallFlow = structuredClone(callFlow);
 
     validateCallFlow();
-    render();
+    renderSidebar();
+    renderGraph();
+    renderStatusBar();
 
     alert("Modifications have been sent!");
   } catch (error) {
@@ -622,18 +641,28 @@ function linkKey(type, id) {
 }
 
 function setLinkedHover(type, id, enabled) {
-  const key = linkKey(type, id);
-  const elements = document.querySelectorAll(`[data-link-key="${key}"]`);
+  if (enabled) {
+    window.hoveredType = type;
+    window.hoveredId = id;
+  } else {
+    window.hoveredType = null;
+    window.hoveredId = null;
+  }
 
-  elements.forEach((element) => {
-    element.classList.toggle("hover-linked", enabled);
+  const key = linkKey(type, id);
+  document.querySelectorAll(`[data-link-key="${key}"]`).forEach((el) => {
+    el.classList.toggle("hover-linked", enabled);
   });
 }
 
 function clearSelection() {
   selectedType = null;
   selectedId = null;
-  render();
+  window.selectedType = null;
+  window.selectedId = null;
+  renderSidebar();
+  renderGraph();
+  renderDetails();
 }
 
 function nodeKey(id) {
@@ -830,6 +859,8 @@ function validateCallFlow() {
     warnings,
   };
 
+  window.validationState = validationState;
+
   return validationState;
 }
 
@@ -906,6 +937,7 @@ async function loadCallFlow(companyId, options = {}) {
   currentView = "editor";
   render();
 
+  const graphCanvas = document.getElementById("graphCanvas");
   const shouldRefresh = options.refresh === true;
 
   if (!shouldRefresh) {
@@ -914,11 +946,14 @@ async function loadCallFlow(companyId, options = {}) {
     if (local && !options.refresh) {
       callFlow = local.callFlow;
       modifiedItems = local.modifiedItems;
+      window.modifiedItems = modifiedItems;
 
       originalCallFlow = structuredClone(callFlow);
 
       selectedType = null;
       selectedId = null;
+      window.selectedType = null;
+      window.selectedId = null;
 
       validateCallFlow();
       render();
@@ -938,11 +973,14 @@ async function loadCallFlow(companyId, options = {}) {
     callFlow = await response.json();
     originalCallFlow = structuredClone(callFlow);
     modifiedItems = new Set();
+    window.modifiedItems = modifiedItems;
 
     saveCallFlowLocally();
 
     selectedType = null;
     selectedId = null;
+    window.selectedType = null;
+    window.selectedId = null;
 
     validateCallFlow();
     render();
@@ -1088,6 +1126,8 @@ function goBackToSelection() {
   callFlow = null;
   selectedType = null;
   selectedId = null;
+  window.selectedType = null;
+  window.selectedId = null;
   
   render();
 }
@@ -1191,23 +1231,31 @@ function setHover(type, id) {
   window.hoveredType = hoveredType;
   window.hoveredId = hoveredId;
 
-  renderSidebar();
-  window.renderReactFlowGraph(callFlow);
+  const key = linkKey(type, id);
+  document.querySelectorAll(`[data-link-key="${key}"]`).forEach((el) => {
+    el.classList.add("hover-linked");
+  });
 }
 
 function clearHover() {
+  const key = hoveredType && hoveredId ? linkKey(hoveredType, hoveredId) : null;
+
   hoveredType = null;
   hoveredId = null;
 
   window.hoveredType = null;
   window.hoveredId = null;
 
-  renderSidebar();
-  window.renderReactFlowGraph(callFlow);
+  if (key) {
+    document.querySelectorAll(`[data-link-key="${key}"]`).forEach((el) => {
+      el.classList.remove("hover-linked");
+    });
+  }
 }
 
 window.setHover = setHover;
 window.clearHover = clearHover;
 window.selectItem = selectItem;
+window.saveCallFlowLocally = saveCallFlowLocally;
 
 render();

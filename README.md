@@ -104,9 +104,9 @@ All specifications are written in Markdown.
 ### Frontend
 
 - Interface connected to the backend internal API
-- Uses the given JSON model to generate a graphe and detail panels
-- Dynamic display of nodes, selection states, hover states and validation infos in real time
+- Uses the given JSON model to generate a graph and detail panels
 - Display using the ReactFlow library
+- Dynamic display of nodes, selection states, hover states and validation infos in real time
 - Modification of prompts and nodes parameters
 - Local memory storage before EZVMS commit
 
@@ -148,8 +148,8 @@ Additionnal features can still be added
 
 Current work focuses on:
 
-- New ReactFlow display
 - Better endpoint features
+- QoL detail panel features
 
 ---
 

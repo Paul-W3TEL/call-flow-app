@@ -23,6 +23,57 @@ let selectedId = null;
 let hoveredType = null;
 let hoveredId = null;
 
+// ─── panel collapse state ─────────────────────────────────────────────────────
+// Keyed by panel title string. Persists in localStorage across selections,
+// call flow changes, and page refreshes. Cleared by refreshData().
+const PANELS_STORAGE_KEY = "diamy.collapsedPanels";
+
+let collapsedPanels = {};
+
+function loadCollapsedPanels() {
+  try {
+    const raw = localStorage.getItem(PANELS_STORAGE_KEY);
+    collapsedPanels = raw ? JSON.parse(raw) : {};
+  } catch {
+    collapsedPanels = {};
+  }
+}
+
+function saveCollapsedPanels() {
+  localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(collapsedPanels));
+}
+
+function clearCollapsedPanels() {
+  collapsedPanels = {};
+  localStorage.removeItem(PANELS_STORAGE_KEY);
+}
+
+function togglePanel(name) {
+  collapsedPanels[name] = !collapsedPanels[name];
+  saveCollapsedPanels();
+  renderDetails();
+}
+
+// Wrap a detail-section with a collapsible header.
+// name   – stable key used for storage (usually the panel title text)
+// title  – display text shown in the header
+// body   – inner HTML shown when expanded
+function detailSection(name, title, body) {
+  const collapsed = !!collapsedPanels[name];
+  const icon = collapsed ? "+" : "−";
+  return `
+    <div class="detail-section${collapsed ? " detail-section-collapsed" : ""}">
+      <div class="detail-section-header">
+        <div class="panel-title">${title}</div>
+        <button class="panel-collapse-btn" onclick="togglePanel('${name.replace(/'/g, "\\'")}')" title="${collapsed ? "Expand" : "Collapse"}">${icon}</button>
+      </div>
+      ${collapsed ? "" : `<div class="detail-section-body">${body}</div>`}
+    </div>
+  `;
+}
+
+loadCollapsedPanels();
+
 window.selectItem = selectItem;
 window.setHover = setHover;
 window.clearHover = clearHover;
@@ -128,142 +179,63 @@ function renderDetails() {
   if (!selectedType || !selectedId) {
     detail.innerHTML = `
     <div class="detail-section">
-      <div class="panel-title">Waiting for selection</div>
-      <div class="helper">
-        Select the entry point, a node, or a target to inspect its parameters.
+      <div class="detail-section-header">
+        <div class="panel-title">Waiting for selection</div>
+      </div>
+      <div class="detail-section-body">
+        <div class="helper">
+          Select the entry point, a node, or a target to inspect its parameters.
+        </div>
       </div>
     </div>
   `;
-
     return;
   }
 
   if (selectedType === "entry") {
-    detail.innerHTML = `
-        <div class="detail-section">
-          <div class="panel-title">Entry Point</div>
-
-          ${row("Company ID", callFlow.company.company_id)}
-          ${row("Company", callFlow.company.name)}
-          ${row("Pilot Number", callFlow.entry_point.pilot_number)}
-          ${row("Start Node", callFlow.entry_point.start_node_id)}
-        </div>
-
-        <div class="detail-section">
-          <div class="panel-title">Rules</div>
-
-          ${row("Multiplicity", "Single entry point")}
-          ${row("Editable", "No")}
-        </div>
-
-        <div class="detail-section">
-          <div class="panel-title">Validation</div>
-
-          ${validationState.errors
-            .filter((error) => error.owner === "entry:entry_point")
-            .map(
-              (error) => `
-                <div class="validation-error">
-                  ${error.code}: ${error.message}
-                </div>
-              `
-            )
-            .join("")}
-
-          ${validationState.warnings
-            .filter((warning) => warning.owner === "entry:entry_point")
-            .map(
-              (warning) => `
-                <div class="validation-warning">
-                  ${warning.code}: ${warning.message}
-                </div>
-              `
-            )
-            .join("")}
-
-          ${
-            validationState.errors.filter(
-              (error) => error.owner === "entry:entry_point"
-            ).length === 0 &&
-            validationState.warnings.filter(
-              (warning) => warning.owner === "entry:entry_point"
-            ).length === 0
-              ? `
-                <div class="helper">
-                  No validation issue.
-                </div>
-              `
-              : ""
-          }
-        </div>
-    `;
-
+    detail.innerHTML =
+      detailSection("Entry Point", "Entry Point", `
+        ${row("Company ID", callFlow.company.company_id)}
+        ${row("Company", callFlow.company.name)}
+        ${row("Pilot Number", callFlow.entry_point.pilot_number)}
+        ${row("Start Node", callFlow.entry_point.start_node_id)}
+      `) +
+      detailSection("Rules", "Rules", `
+        ${row("Multiplicity", "Single entry point")}
+        ${row("Editable", "No")}
+      `) +
+      detailSection("Validation", "Validation", (() => {
+        const errors = validationState.errors.filter(e => e.owner === "entry:entry_point");
+        const warnings = validationState.warnings.filter(w => w.owner === "entry:entry_point");
+        if (errors.length === 0 && warnings.length === 0) return `<div class="helper">No validation issue.</div>`;
+        return errors.map(e => `<div class="validation-error">${e.code}: ${e.message}</div>`).join("") +
+               warnings.map(w => `<div class="validation-warning">${w.code}: ${w.message}</div>`).join("");
+      })());
     return;
   }
 
   if (selectedType === "target") {
-    const target = callFlow.targets.find(
-      (item) => item.id === selectedId
-    );
+    const target = callFlow.targets.find(item => item.id === selectedId);
+    const errors = validationState.errors.filter(e => e.owner === targetKey(target.id));
+    const warnings = validationState.warnings.filter(w => w.owner === targetKey(target.id));
 
-    detail.innerHTML = `
-      <div class="detail-section">
-        <div class="panel-title">Target</div>
-
+    detail.innerHTML =
+      detailSection("Target", "Target", `
         ${row("Target ID", target.id)}
         ${row("Type", target.type)}
         ${row("Label", target.label)}
         ${row("Number", target.number)}
-      </div>
-
-      <div class="detail-section">
-        <div class="panel-title">Validation</div>
-
-        ${validationState.errors
-          .filter((error) => error.owner === targetKey(target.id))
-          .map(
-            (error) => `
-              <div class="validation-error">
-                ${error.code}: ${error.message}
-              </div>
-            `
-          )
-          .join("")}
-
-        ${validationState.warnings
-          .filter((warning) => warning.owner === targetKey(target.id))
-          .map(
-            (warning) => `
-              <div class="validation-warning">
-                ${warning.code}: ${warning.message}
-              </div>
-            `
-          )
-          .join("")}
-
-        ${
-          validationState.errors.filter(
-            (error) => error.owner === targetKey(target.id)
-          ).length === 0 &&
-          validationState.warnings.filter(
-            (warning) => warning.owner === targetKey(target.id)
-          ).length === 0
-            ? `
-              <div class="helper">
-                No validation issue.
-              </div>
-            `
-            : ""
-        }
-      </div>
-    `;
-
+      `) +
+      detailSection("Validation", "Validation", (() => {
+        if (errors.length === 0 && warnings.length === 0) return `<div class="helper">No validation issue.</div>`;
+        return errors.map(e => `<div class="validation-error">${e.code}: ${e.message}</div>`).join("") +
+               warnings.map(w => `<div class="validation-warning">${w.code}: ${w.message}</div>`).join("");
+      })());
     return;
   }
 
   if (selectedType === "node") {
-    const node = callFlow.nodes.find((item) => item.id === selectedId);
-
+    const node = callFlow.nodes.find(item => item.id === selectedId);
     const mappingKeys = [
       { key: "0", label: "Key 0" }, { key: "1", label: "Key 1" },
       { key: "2", label: "Key 2" }, { key: "3", label: "Key 3" },
@@ -274,104 +246,67 @@ function renderDetails() {
       { key: "default", label: "Default route" }
     ];
 
+    const nodeErrors = validationState.errors.filter(e => e.owner === nodeKey(node.id));
+    const nodeWarnings = validationState.warnings.filter(w => w.owner === nodeKey(node.id));
 
-    detail.innerHTML = `
-    <div class="detail-section">
-      <div class="panel-title">General</div>
-      ${row("Node ID", node.id)}
-      ${row("Type", node.type)}
-      ${row("Label", node.label)}
-    </div>
-
-    <div class="detail-section">
-      <div class="panel-title">Editable Fields</div>
-
-      <div class="edit-field">
-        <label>Main Prompt</label>
-        <input
-          class="di-input"
-          type="file"
-          accept=".mp3,.mp4,.wav,audio/mpeg,audio/wav,video/mp4"
-          onchange="updatePromptFile('${node.id}', this.files[0])"
+    detail.innerHTML =
+      detailSection("General", "General", `
+        ${row("Node ID", node.id)}
+        ${row("Type", node.type)}
+        ${row("Label", node.label)}
+      `) +
+      detailSection("Editable Fields", "Editable Fields", `
+        <div class="edit-field">
+          <label>Main Prompt</label>
+          <input
+            class="di-input"
+            type="file"
+            accept=".mp3,.mp4,.wav,audio/mpeg,audio/wav,video/mp4"
+            onchange="updatePromptFile('${node.id}', this.files[0])"
           />
-
           <div class="helper">
-          Current prompt: <span class="mono">${node.prompt || "No file selected"}</span>
+            Current prompt: <span class="mono">${node.prompt || "No file selected"}</span>
           </div>
-      </div>
-
-      <div class="edit-field">
-        <label>Timeout</label>
-        <input
-          class="di-input"
-          type="number"
-          value="${node.settings.timeout}"
-          onchange="updateNodeField('${node.id}', 'timeout', this.value)"
-        />
-      </div>
-
-      <div class="edit-field">
-        <label>Retries</label>
-        <input
-          class="di-input"
-          type="number"
-          value="${node.settings.retries}"
-          onchange="updateNodeField('${node.id}', 'retries', this.value)"
-        />
-      </div>
-    </div>
-
-    <div class="detail-section">
-      <div class="panel-title">DTMF & Fallback Actions</div>
-      ${mappingKeys.map((item) => {
-        const value = node.dtmf?.[item.key] ?? "";
-        return `
-          <div class="edit-field">
-            <label>${item.label}</label>
-            <select class="di-input" onchange="updateDtmf('${node.id}', '${item.key}', this.value)">
-              ${destinationOptions(value)}
-            </select>
-          </div>
-        `;
-      }).join("")}
-    </div>
-
-  <div class="detail-section">
-    <div class="panel-title">Validation</div>
-
-    ${validationState.errors
-      .filter((error) => error.owner === nodeKey(node.id))
-      .map((error) => `<div class="validation-error">${error.code}: ${error.message}</div>`)
-      .join("")}
-
-    ${validationState.warnings
-      .filter((warning) => warning.owner === nodeKey(node.id))
-      .map((warning) => `<div class="validation-warning">${warning.code}: ${warning.message}</div>`)
-      .join("")}
-
-    ${
-      validationState.errors.filter((error) => error.owner === nodeKey(node.id)).length === 0 &&
-      validationState.warnings.filter((warning) => warning.owner === nodeKey(node.id)).length === 0
-        ? `<div class="helper">No validation issue.</div>`
-        : ""
-    }
-  </div>
-`;
-
+        </div>
+        <div class="edit-field">
+          <label>Timeout</label>
+          <input
+            class="di-input"
+            type="number"
+            value="${node.settings.timeout}"
+            onchange="updateNodeField('${node.id}', 'timeout', this.value)"
+          />
+        </div>
+        <div class="edit-field">
+          <label>Retries</label>
+          <input
+            class="di-input"
+            type="number"
+            value="${node.settings.retries}"
+            onchange="updateNodeField('${node.id}', 'retries', this.value)"
+          />
+        </div>
+      `) +
+      detailSection("DTMF & Fallback Actions", "DTMF & Fallback Actions", `
+        ${mappingKeys.map(item => {
+          const value = node.dtmf?.[item.key] ?? "";
+          return `
+            <div class="edit-field">
+              <label>${item.label}</label>
+              <select class="di-input" onchange="updateDtmf('${node.id}', '${item.key}', this.value)">
+                ${destinationOptions(value)}
+              </select>
+            </div>
+          `;
+        }).join("")}
+      `) +
+      detailSection("Validation", "Validation", (() => {
+        if (nodeErrors.length === 0 && nodeWarnings.length === 0) return `<div class="helper">No validation issue.</div>`;
+        return nodeErrors.map(e => `<div class="validation-error">${e.code}: ${e.message}</div>`).join("") +
+               nodeWarnings.map(w => `<div class="validation-warning">${w.code}: ${w.message}</div>`).join("");
+      })());
     return;
   }
-
-  const target = callFlow.targets.find((item) => item.id === selectedId);
-
-  detail.innerHTML = `
-    <div class="detail-section">
-      <div class="panel-title">Target</div>
-      ${row("Target ID", target.id)}
-      ${row("Type", target.type)}
-      ${row("Label", target.label)}
-      ${row("Number", target.number)}
-    </div>
-  `;
 }
 
 function row(label, value) {
@@ -524,6 +459,7 @@ async function refreshData() {
 
   clearCallFlowLocally(companyId);
   modifiedItems.clear();
+  clearCollapsedPanels();
   await loadCallFlow(companyId, { refresh: true });
 }
 
@@ -1257,5 +1193,6 @@ window.setHover = setHover;
 window.clearHover = clearHover;
 window.selectItem = selectItem;
 window.saveCallFlowLocally = saveCallFlowLocally;
+window.togglePanel = togglePanel;
 
 render();

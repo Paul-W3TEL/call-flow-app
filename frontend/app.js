@@ -327,15 +327,6 @@ function renderDetails() {
             </select>
           </div>
         `).join("")}
-        <div class="edit-field">
-          <label>No Answer Timeout (sec)</label>
-          <input
-            class="di-input"
-            type="number"
-            value="${node.fallback?.no_answer_timeout ?? ""}"
-            onchange="updateNodeFallbackValue('${node.id}', 'no_answer_timeout', this.value)"
-          />
-        </div>
       `) +
       detailSection("Validation", "Validation", (() => {
         if (nodeErrors.length === 0 && nodeWarnings.length === 0) return `<div class="helper">No validation issue.</div>`;
@@ -599,8 +590,7 @@ async function applyToEzvms() {
         "ext_busy_menu": node.fallback?.ext_busy_menu || null,
         "ext_no_answer_menu": node.fallback?.ext_no_answer_menu || null,
         "ext_unavailable_menu": node.fallback?.ext_unavailable_menu || null,
-        "retry_fail_action": node.fallback?.retry_fail_action || null,
-        "no_answer_timeout": node.fallback?.no_answer_timeout ?? null
+        "retry_fail_action": node.fallback?.retry_fail_action || null
       }
     }));
 

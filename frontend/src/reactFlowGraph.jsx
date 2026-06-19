@@ -117,6 +117,21 @@ function toReactFlow(callFlow) {
     }))
   ];
 
+  const entryRouteLabels = {
+    working_hour_menu: "Working Hour",
+    after_work_menu: "After Hours",
+    holiday_menu: "Holiday",
+    priority_menu: "Priority",
+    black_list_menu: "Black List"
+  };
+
+  const fallbackLabels = {
+    ext_busy_menu: "Extension Busy",
+    ext_no_answer_menu: "Extension No Answer",
+    ext_unavailable_menu: "Extension Unavailable",
+    retry_fail_action: "Retry Failed"
+  };
+
   const edges = [
     {
       id: "entry-start",
@@ -125,15 +140,33 @@ function toReactFlow(callFlow) {
       label: "start",
       type: "smoothstep"
     },
-    ...callFlow.nodes.flatMap((node) =>
-      Object.entries(node.dtmf || {}).map(([key, destination]) => ({
+    ...Object.entries(callFlow.entry_point.routes || {})
+      .filter(([, destination]) => destination)
+      .map(([key, destination]) => ({
+        id: `entry-${key}-${destination}`,
+        source: "entry_point",
+        target: destination,
+        label: entryRouteLabels[key] || key,
+        type: "smoothstep"
+      })),
+    ...callFlow.nodes.flatMap((node) => [
+      ...Object.entries(node.fallback || {})
+        .filter(([, destination]) => destination)
+        .map(([key, destination]) => ({
+          id: `${node.id}-fallback-${key}-${destination}`,
+          source: node.id,
+          target: destination,
+          label: fallbackLabels[key] || key,
+          type: "smoothstep"
+        })),
+      ...Object.entries(node.dtmf || {}).map(([key, destination]) => ({
         id: `${node.id}-${key}-${destination}`,
         source: node.id,
         target: destination,
         label: key === "default" ? "default" : `DTMF ${key}`,
         type: "smoothstep"
       }))
-    )
+    ])
   ];
 
   return { nodes, edges };
@@ -141,13 +174,12 @@ function toReactFlow(callFlow) {
 
 function ReactFlowGraph({ callFlow, version }) {
   const callFlowRef = useRef(callFlow);
+  callFlowRef.current = callFlow;
 
   // Build initial node/edge set once on mount
   const initial = useMemo(() => toReactFlow(callFlow), []);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
-
-  useEffect(() => { callFlowRef.current = callFlow; }, [callFlow]);
 
   useEffect(() => {
     const updated = toReactFlow(callFlowRef.current);

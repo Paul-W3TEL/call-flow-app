@@ -24,7 +24,6 @@ let hoveredType = null;
 let hoveredId = null;
 
 const PANELS_STORAGE_KEY = "diamy.collapsedPanels";
-
 let collapsedPanels = {};
 
 function loadCollapsedPanels() {
@@ -186,6 +185,15 @@ function renderDetails() {
   }
 
   if (selectedType === "entry") {
+    const routes = callFlow.entry_point.routes || {};
+    const routeFields = [
+      { key: "working_hour_menu", label: "Working Hour Route" },
+      { key: "after_work_menu", label: "After Hours Route" },
+      { key: "holiday_menu", label: "Holiday Route" },
+      { key: "priority_menu", label: "Priority Route" },
+      { key: "black_list_menu", label: "Black List Route" }
+    ];
+
     detail.innerHTML =
       detailSection("Entry Point", "Entry Point", `
         ${row("Company ID", callFlow.company.company_id)}
@@ -193,9 +201,19 @@ function renderDetails() {
         ${row("Pilot Number", callFlow.entry_point.pilot_number)}
         ${row("Start Node", callFlow.entry_point.start_node_id)}
       `) +
+      detailSection("Time-Based Routes", "Time-Based Routes", `
+        ${routeFields.map(field => `
+          <div class="edit-field">
+            <label>${field.label}</label>
+            <select class="di-input" onchange="updateEntryRoute('${field.key}', this.value)">
+              ${destinationOptions(routes[field.key] ?? "")}
+            </select>
+          </div>
+        `).join("")}
+      `) +
       detailSection("Rules", "Rules", `
         ${row("Multiplicity", "Single entry point")}
-        ${row("Editable", "No")}
+        ${row("Editable", "Routes only")}
       `) +
       detailSection("Validation", "Validation", (() => {
         const errors = validationState.errors.filter(e => e.owner === "entry:entry_point");
@@ -239,6 +257,13 @@ function renderDetails() {
       { key: "default", label: "Default route" }
     ];
 
+    const fallbackFields = [
+      { key: "ext_busy_menu", label: "Extension Busy Route" },
+      { key: "ext_no_answer_menu", label: "Extension No Answer Route" },
+      { key: "ext_unavailable_menu", label: "Extension Unavailable Route" },
+      { key: "retry_fail_action", label: "Retry Failed Route" }
+    ];
+
     const nodeErrors = validationState.errors.filter(e => e.owner === nodeKey(node.id));
     const nodeWarnings = validationState.warnings.filter(w => w.owner === nodeKey(node.id));
 
@@ -280,7 +305,7 @@ function renderDetails() {
           />
         </div>
       `) +
-      detailSection("DTMF & Fallback Actions", "DTMF & Fallback Actions", `
+      detailSection("DTMF Actions", "DTMF Actions", `
         ${mappingKeys.map(item => {
           const value = node.dtmf?.[item.key] ?? "";
           return `
@@ -292,6 +317,25 @@ function renderDetails() {
             </div>
           `;
         }).join("")}
+      `) +
+      detailSection("Call Handling Fallbacks", "Call Handling Fallbacks", `
+        ${fallbackFields.map(field => `
+          <div class="edit-field">
+            <label>${field.label}</label>
+            <select class="di-input" onchange="updateNodeFallback('${node.id}', '${field.key}', this.value)">
+              ${destinationOptions(node.fallback?.[field.key] ?? "")}
+            </select>
+          </div>
+        `).join("")}
+        <div class="edit-field">
+          <label>No Answer Timeout (sec)</label>
+          <input
+            class="di-input"
+            type="number"
+            value="${node.fallback?.no_answer_timeout ?? ""}"
+            onchange="updateNodeFallbackValue('${node.id}', 'no_answer_timeout', this.value)"
+          />
+        </div>
       `) +
       detailSection("Validation", "Validation", (() => {
         if (nodeErrors.length === 0 && nodeWarnings.length === 0) return `<div class="helper">No validation issue.</div>`;
@@ -341,6 +385,54 @@ function itemClasses(type, id) {
   }
 
   return classes.join(" ");
+}
+
+function updateEntryRoute(routeKey, value) {
+  if (!callFlow.entry_point.routes) callFlow.entry_point.routes = {};
+  callFlow.entry_point.routes[routeKey] = value || null;
+
+  modifiedItems.add(entryKey());
+  window.modifiedItems = modifiedItems;
+  saveCallFlowLocally();
+  validateCallFlow();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
+}
+
+function updateNodeFallback(nodeId, fallbackKey, value) {
+  const node = callFlow.nodes.find((item) => item.id === nodeId);
+  if (!node) return;
+  if (!node.fallback) node.fallback = {};
+
+  node.fallback[fallbackKey] = value || null;
+
+  modifiedItems.add(nodeKey(nodeId));
+  window.modifiedItems = modifiedItems;
+  saveCallFlowLocally();
+  validateCallFlow();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
+}
+
+function updateNodeFallbackValue(nodeId, fallbackKey, value) {
+  const node = callFlow.nodes.find((item) => item.id === nodeId);
+  if (!node) return;
+  if (!node.fallback) node.fallback = {};
+
+  node.fallback[fallbackKey] = value === "" ? null : Number(value);
+
+  modifiedItems.add(nodeKey(nodeId));
+  window.modifiedItems = modifiedItems;
+  saveCallFlowLocally();
+  validateCallFlow();
+
+  renderSidebar();
+  renderGraph();
+  renderStatusBar();
 }
 
 function updateNodeField(nodeId, field, value) {
@@ -502,11 +594,30 @@ async function applyToEzvms() {
         ),
         "key_star_value": node.dtmf?.["*"] || null,
         "key_hashtag_value": node.dtmf?.["#"] || null,
-        "default_action_value": node.dtmf?.["default"] || null
+        "default_action_value": node.dtmf?.["default"] || null,
+        // Call handling fallback routes (EZVMS CreateCompanyMenu fields)
+        "ext_busy_menu": node.fallback?.ext_busy_menu || null,
+        "ext_no_answer_menu": node.fallback?.ext_no_answer_menu || null,
+        "ext_unavailable_menu": node.fallback?.ext_unavailable_menu || null,
+        "retry_fail_action": node.fallback?.retry_fail_action || null,
+        "no_answer_timeout": node.fallback?.no_answer_timeout ?? null
       }
     }));
 
-  if (modifiedNodes.length === 0) {
+  const entryModified = modifiedItems.has(entryKey());
+  const entryRoutes = callFlow.entry_point.routes || {};
+
+  const entryPointPayload = {
+    ...callFlow.entry_point,
+    // EZVMS Company-level routing fields (working_hour_menu, after_work_menu, etc.)
+    working_hour_menu: entryRoutes.working_hour_menu || null,
+    after_work_menu: entryRoutes.after_work_menu || null,
+    holiday_menu: entryRoutes.holiday_menu || null,
+    priority_menu: entryRoutes.priority_menu || null,
+    black_list_menu: entryRoutes.black_list_menu || null
+  };
+
+  if (modifiedNodes.length === 0 && !entryModified) {
     alert("No modifications to apply.");
     return;
   }
@@ -514,7 +625,7 @@ async function applyToEzvms() {
   try {
     const requestPayload = {
       company: callFlow.company,
-      entry_point: callFlow.entry_point,
+      entry_point: entryPointPayload,
       nodes: modifiedNodes
     };
 
@@ -638,13 +749,56 @@ function validateCallFlow() {
     });
   }
 
+  // Validate entry-level time-based/priority/black-list routes point to real destinations
+  const entryRouteFields = [
+    ["working_hour_menu", "Working hour route"],
+    ["after_work_menu", "After hours route"],
+    ["holiday_menu", "Holiday route"],
+    ["priority_menu", "Priority route"],
+    ["black_list_menu", "Black list route"]
+  ];
+
+  entryRouteFields.forEach(([key, label]) => {
+    const destination = callFlow.entry_point.routes?.[key];
+    if (destination && !validDestinations.includes(destination)) {
+      errors.push({
+        code: "InvalidRouteDestination",
+        owner: entryKey(),
+        message: `${label} points to a destination that does not exist: ${destination}.`,
+      });
+    }
+  });
+
   const reachableIds = new Set();
 
   reachableIds.add(callFlow.entry_point.start_node_id);
 
+  // Entry-level time-based/priority/black-list routes are also valid entry paths
+  const entryRoutes = callFlow.entry_point.routes || {};
+  [
+    entryRoutes.working_hour_menu,
+    entryRoutes.after_work_menu,
+    entryRoutes.holiday_menu,
+    entryRoutes.priority_menu,
+    entryRoutes.black_list_menu
+  ].forEach((destination) => {
+    if (destination) reachableIds.add(destination);
+  });
+
   callFlow.nodes.forEach((node) => {
     Object.values(node.dtmf || {}).forEach((destination) => {
       reachableIds.add(destination);
+    });
+
+    // Node-level fallback routes also count as reachable paths
+    const fallback = node.fallback || {};
+    [
+      fallback.ext_busy_menu,
+      fallback.ext_no_answer_menu,
+      fallback.ext_unavailable_menu,
+      fallback.retry_fail_action
+    ].forEach((destination) => {
+      if (destination) reachableIds.add(destination);
     });
   });
 
@@ -755,6 +909,25 @@ function validateCallFlow() {
             message: `DTMF key ${key} links back to its origin node: ${node.id}.`,
           });
         }
+    });
+
+    // Validate call handling fallback routes point to real destinations
+    const fallbackFields = [
+      ["ext_busy_menu", "Extension busy route"],
+      ["ext_no_answer_menu", "Extension no answer route"],
+      ["ext_unavailable_menu", "Extension unavailable route"],
+      ["retry_fail_action", "Retry failed route"]
+    ];
+
+    fallbackFields.forEach(([key, label]) => {
+      const destination = node.fallback?.[key];
+      if (destination && !validDestinations.includes(destination)) {
+        errors.push({
+          code: "InvalidFallbackDestination",
+          owner,
+          message: `${label} points to a destination that does not exist: ${destination}.`,
+        });
+      }
     });
   });
 
@@ -1187,5 +1360,8 @@ window.clearHover = clearHover;
 window.selectItem = selectItem;
 window.saveCallFlowLocally = saveCallFlowLocally;
 window.togglePanel = togglePanel;
+window.updateEntryRoute = updateEntryRoute;
+window.updateNodeFallback = updateNodeFallback;
+window.updateNodeFallbackValue = updateNodeFallbackValue;
 
 render();

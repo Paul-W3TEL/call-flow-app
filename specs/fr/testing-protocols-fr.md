@@ -1,24 +1,25 @@
 # Protocoles de test
 
 - **Titre du document** > Protocoles de test
-- **Version** > 1.4
+- **Version** > 1.6
 - **Status** > Brouillon interne
 - **Auteur** > Paul Koster
-- **Date** > 28 mai 2026
+- **Date** > 19 juin 2026
 - **Confidentialité** > Document interne – W3TEL / TEQTEL
 
 ------
 
 ## Historique des versions
 
-| Version | Date        | Auteur      | Description                              |
-| ------- | ----------- | ----------- | ---------------------------------------- |
-| 1.0     | 11 mai 2026 | Paul Koster | Version initial                          |
-| 1.1     | 11 mai 2026 | Paul Koster | Protocoles de test API                   |
-| 1.2     | 12 mai 2026 | Paul Koster | Protocoles de test frontend              |
-| 1.3     | 28 mai 2026 | Paul Koster | Tests pour l'app complète                |
-| 1.4     | 28 mai 2026 | Paul Koster | Protocoles de test mémoire locale        |
-| 1.5     | 5 juin 2026 | Paul Koster | Tests pour le nouvel affichage ReactFlow |
+| Version | Date         | Auteur      | Description                              |
+| ------- | ------------ | ----------- | ---------------------------------------- |
+| 1.0     | 11 mai 2026  | Paul Koster | Version initial                          |
+| 1.1     | 11 mai 2026  | Paul Koster | Protocoles de test API                   |
+| 1.2     | 12 mai 2026  | Paul Koster | Protocoles de test frontend              |
+| 1.3     | 28 mai 2026  | Paul Koster | Tests pour l'app complète                |
+| 1.4     | 28 mai 2026  | Paul Koster | Protocoles de test mémoire locale        |
+| 1.5     | 5 juin 2026  | Paul Koster | Tests pour le nouvel affichage ReactFlow |
+| 1.5     | 19 juin 2026 | Paul Koster | Modifié pour le nouveau démarrage        |
 
 ------
 
@@ -63,7 +64,7 @@ Depuis le serveur :
 
 ------
 
-## 3. Connexion au serveur de test
+## 3. Connexion au serveur
 
 Depuis Git Bash :
 
@@ -100,44 +101,53 @@ Actions possibles :
 - vérifier que le serveur est allumé (voir avec l'administrateur)
 - vérifier que le port SSH est ouvert (voir avec l'administrateur)
 
+Une fois dans le serveur : 
+
+```bash
+cd /home/paul/CallFlows
+bash ./start/sh
+```
+
+Résultat attendu :
+
+```bash
+Starting backend...
+Starting frontend...
+Backend PID: 33811
+Frontend PID: 33812
+Press Ctrl+C to stop both processes.
+
+> dev
+> vite --host 0.0.0.0 --port 8081
+
+
+> call-flow-backend@0.1.0 dev
+> node src/server.js
+
+Call Flow API running on http://localhost:3000
+
+  VITE v8.0.16  ready in 284 ms
+
+  ➜  Local:   http://localhost:8081/
+  ➜  Network: http://172.16.100.251:8081/
+```
+
+En cas d'erreur :
+
+```bash
+cd frontend
+npm install
+cd ../backend
+npm install
+cd ..
+bash ./start.sh
+```
+
 ------
 
 ## 4. Protocoles de tests API
 
-### 4.1 Démarrage de l'API
-
-Depuis le serveur :
-
-```bash
-cd /home/paul/CallFlows/backend
-npm install
-npm run dev
-```
-
-Affichage attendu :
-
-```txt
-Call Flow API running on http://localhost:3000
-```
-
-Erreurs possibles :
-
-```txt
-npm: command not found
-node: command not found
-Cannot find module
-EADDRINUSE
-```
-
-Actions possibles :
-
-- vérifier que Node.js est installé (voir avec l'administrateur)
-- vérifier que la commande est lancée depuis `backend/`
-- vérifier que `package.json` existe (avec la commande `ls`)
-- vérifier que `src/server.js` existe (avec la commande `ls ./src`)
-- si port occupé, arrêter l’ancien process ou changer le port (voir avec l'administrateur)
-
-### 4.2 Health Check
+### 4.1 Health Check
 
 **Objectif** - Vérifier que l’API répond.
 
@@ -176,7 +186,7 @@ Si erreur, vérifier :
 - bonne route dans `server.js`
 - pare-feu si test depuis navigateur externe
 
-### 4.3 Contrat API
+### 4.2 Contrat API
 
 **Objectif** - Vérifier que le contrat API est accessible.
 
@@ -210,7 +220,7 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.4 Récupération d’un Call Flow valide
+### 4.3 Récupération d’un Call Flow valide
 
 **Objectif** - Vérifier que l’API retourne les données d'exemple du Call Flow.
 
@@ -247,7 +257,7 @@ Statut attendu
 HTTP 200
 ```
 
-### 4.5 Récupération d’un Call Flow inexistant
+### 4.4 Récupération d’un Call Flow inexistant
 
 **Objectif** - Vérifier que l’API retourne une erreur si l’identifiant société et/ou le numéro pilote est incorrect.
 

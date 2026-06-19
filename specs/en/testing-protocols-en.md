@@ -1,24 +1,25 @@
 # Testing protocols
 
 - **Document title** > Testing protocols
-- **Version** > 1.4
+- **Version** > 1.6
 - **Status** > Internal draft
 - **Author** > Paul Koster
-- **Date** > May 28th 2026
+- **Date** > June 19th 2026
 - **Confidentiality** > Internal document – W3TEL / TEQTEL
 
 ------
 
 ## Version history
 
-| Version | Date          | Author      | Description                           |
-| ------- | ------------- | ----------- | ------------------------------------- |
-| 1.0     | May 11th 2026 | Paul Koster | Initial version                       |
-| 1.1     | May 11th 2026 | Paul Koster | API testing protocols                 |
-| 1.2     | May 12th 2026 | Paul Koster | Frontend testing protocols            |
-| 1.3     | May 28th 2026 | Paul Koster | Testing for the full app              |
-| 1.4     | May 28th 2026 | Paul Koster | Local memory testing protocols        |
-| 1.5     | June 5th 2026 | Paul Koster | Testing for the new ReactFlow display |
+| Version | Date           | Author      | Description                           |
+| ------- | -------------- | ----------- | ------------------------------------- |
+| 1.0     | May 11th 2026  | Paul Koster | Initial version                       |
+| 1.1     | May 11th 2026  | Paul Koster | API testing protocols                 |
+| 1.2     | May 12th 2026  | Paul Koster | Frontend testing protocols            |
+| 1.3     | May 28th 2026  | Paul Koster | Testing for the full app              |
+| 1.4     | May 28th 2026  | Paul Koster | Local memory testing protocols        |
+| 1.5     | June 5th 2026  | Paul Koster | Testing for the new ReactFlow display |
+| 1.6     | June 19th 2026 | Paul Koster | Update for the new starting up        |
 
 ------
 
@@ -63,7 +64,7 @@ From the server:
 
 -----
 
-## 3. Connection to the test server
+## 3. Connection to the server
 
 From Git Bash
 
@@ -71,14 +72,14 @@ From Git Bash
 ssh utilisateur@IP_SERVEUR
 ```
 
-Example :
+Example:
 
 ```bash
 ssh paul@172.16.100.251
 ```
 Then enter a password
 
-Expected result
+Expected result:
 
 ```txt
 SSH connection opened on the server
@@ -98,46 +99,55 @@ Possible actions:
 - check the username
 - check the password or the SSH key
 - check if the server is on (see with the administrator)
-- check if the SSH port is poen (see with the administrator)
+- check if the SSH port is open (see with the administrator)
+
+Once in the server:
+
+```bash
+cd /home/paul/CallFlows
+bash ./start/sh
+```
+
+Expected result:
+
+```bash
+Starting backend...
+Starting frontend...
+Backend PID: 33811
+Frontend PID: 33812
+Press Ctrl+C to stop both processes.
+
+> dev
+> vite --host 0.0.0.0 --port 8081
+
+
+> call-flow-backend@0.1.0 dev
+> node src/server.js
+
+Call Flow API running on http://localhost:3000
+
+  VITE v8.0.16  ready in 284 ms
+
+  ➜  Local:   http://localhost:8081/
+  ➜  Network: http://172.16.100.251:8081/
+```
+
+If an error is raised:
+
+```bash
+cd frontend
+npm install
+cd ../backend
+npm install
+cd ..
+bash ./start.sh
+```
 
 -----
 
 ## 4. API testing protocols
 
-### 4.1 API startup
-
-From the server:
-
-```bash
-cd /home/paul/CallFlows/backend
-npm install
-npm run dev
-```
-
-Expected display:
-
-```txt
-Call Flow API running on http://localhost:3000
-```
-
-Possible errors:
-
-```txt
-npm: command not found
-node: command not found
-Cannot find module
-EADDRINUSE
-```
-
-Possible actions:
-
-- check if Node.js is installed (see with the administrator)
-- check if the command is run from `backend/`
-- check if `package.json` exists (run the command `ls`)
-- check if `src/server.js` exists (run the command `ls ./src`)
-- if the port is in use, stop the previous process or switch ports (see with the administrator)
-
-### 4.2 Health Check
+### 4.1 Health Check
 
 **Goal** - Check if the API replies
 
@@ -176,7 +186,7 @@ If error, check:
 - correct routing in `server.js`
 - firewall if testing from an external navigator
 
-### 4.3 API contract
+### 4.2 API contract
 
 **Goal** - Check if the API contract is accessible
 
@@ -210,7 +220,7 @@ Expected status
 HTTP 200
 ```
 
-### 4.4 Fetching of a valid Call Flow
+### 4.3 Fetching of a valid Call Flow
 
 **Goal** - Check if the API returns the example Call Flow data
 
@@ -247,7 +257,7 @@ Expected status
 HTTP 200
 ```
 
-### 4.5 Fetching of an invalid Call Flow
+### 4.4 Fetching of an invalid Call Flow
 
 **Goal** - Check if the API returns an error if the company ID and/or the pilot number is incorrect
 

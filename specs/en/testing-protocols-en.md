@@ -64,7 +64,9 @@ From the server:
 
 -----
 
-## 3. Connection to the server
+## 3. Starting the app
+
+### 3.1 Connecting to the server
 
 From Git Bash
 
@@ -100,6 +102,8 @@ Possible actions:
 - check the password or the SSH key
 - check if the server is on (see with the administrator)
 - check if the SSH port is open (see with the administrator)
+
+### 3.2 Start the app
 
 Once in the server:
 

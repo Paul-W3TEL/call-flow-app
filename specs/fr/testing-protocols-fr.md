@@ -64,7 +64,9 @@ Depuis le serveur :
 
 ------
 
-## 3. Connexion au serveur
+## 3. Démarrage de l'application
+
+### 3.1 Connexion au serveur
 
 Depuis Git Bash :
 
@@ -101,7 +103,9 @@ Actions possibles :
 - vérifier que le serveur est allumé (voir avec l'administrateur)
 - vérifier que le port SSH est ouvert (voir avec l'administrateur)
 
-Une fois dans le serveur : 
+### 3.2 Lancer l'application
+
+Une fois dans le serveur :
 
 ```bash
 cd /home/paul/CallFlows

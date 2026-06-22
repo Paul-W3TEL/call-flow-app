@@ -42,6 +42,7 @@ Frontend Graph UI
 /
 ├── backend/
 │   ├── package.json
+|   ├── .env
 │   └── src/
 │       ├── api.json
 │       ├── ezvms/
@@ -73,6 +74,7 @@ Frontend Graph UI
 │       ├── soap-mapping-fr.md
 │       └── ui-spec-fr.md
 │
+├── start.sh
 └── README.md
 ```
 
@@ -109,6 +111,11 @@ All specifications are written in Markdown.
 - Dynamic display of nodes, selection states, hover states and validation infos in real time
 - Modification of prompts and nodes parameters
 - Local memory storage before EZVMS commit
+
+### Service files
+
+Files such as `start.sh` and `.env` are here to help open the app.
+More informations in the testing protocols files, section 3.2
 
 ---
 

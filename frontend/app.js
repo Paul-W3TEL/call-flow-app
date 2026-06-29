@@ -95,6 +95,10 @@ function render() {
   document.getElementById("pilotNumber").textContent =
     callFlow.entry_point.pilot_number;
 
+  refreshEditorView();
+}
+
+function refreshEditorView() {
   renderSidebar();
   renderGraph();
   renderDetails();
@@ -387,9 +391,7 @@ function updateEntryRoute(routeKey, value) {
   saveCallFlowLocally();
   validateCallFlow();
 
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 }
 
 function updateNodeFallback(nodeId, fallbackKey, value) {
@@ -404,9 +406,7 @@ function updateNodeFallback(nodeId, fallbackKey, value) {
   saveCallFlowLocally();
   validateCallFlow();
 
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 }
 
 function updateNodeFallbackValue(nodeId, fallbackKey, value) {
@@ -421,9 +421,7 @@ function updateNodeFallbackValue(nodeId, fallbackKey, value) {
   saveCallFlowLocally();
   validateCallFlow();
 
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 }
 
 function updateNodeField(nodeId, field, value) {
@@ -448,9 +446,7 @@ function updateNodeField(nodeId, field, value) {
   saveCallFlowLocally();
   validateCallFlow();
 
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 }
 
 function updateDtmf(nodeId, key, value) {
@@ -480,9 +476,7 @@ function updateDtmf(nodeId, key, value) {
   saveCallFlowLocally();
   validateCallFlow();
 
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 }
 
 function updatePromptFile(nodeId, file) {
@@ -503,9 +497,7 @@ function updatePromptFile(nodeId, file) {
       message: "Invalid prompt file. Allowed formats: MP3, MP4, WAV.",
     });
 
-    renderSidebar();
-    renderGraph();
-    renderStatusBar();
+    refreshEditorView();
     alert("Invalid prompt file. Allowed formats: MP3, MP4, WAV.");
     return;
   }
@@ -541,9 +533,7 @@ async function refreshData() {
 
 function runManualValidation() {
   const result = validateCallFlow();
-  renderSidebar();
-  renderGraph();
-  renderStatusBar();
+  refreshEditorView();
 
   if (result.status === "valid") {
     alert("Validation passed.");
@@ -656,9 +646,7 @@ async function applyToEzvms() {
     originalCallFlow = structuredClone(callFlow);
 
     validateCallFlow();
-    renderSidebar();
-    renderGraph();
-    renderStatusBar();
+    refreshEditorView();
 
     alert("Modifications have been sent!");
   } catch (error) {

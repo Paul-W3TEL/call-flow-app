@@ -124,6 +124,27 @@ export async function getEzvmsCompany(companyId) {
   });
 }
 
+// Sends the entry-point's time-based / priority / black-list routing fields
+// to EZVMS using the real ModifyCompany SOAP field names (see
+// EZVMS6800_SOAP_Provisioning_Interface_V2_0 §3 "ModifyCompany").
+export async function modifyCompanyFromEntryPoint(companyId, entryPoint) {
+  const routes = entryPoint.routes || {};
+
+  const payload = {
+    company_id: companyId,
+    working_hour_menu: routes.working_hour_menu || "",
+    after_work_menu: routes.after_work_menu || "",
+    holiday_menu: routes.holiday_menu || "",
+    priority_menu: routes.priority_menu || "",
+    black_list_menu: routes.black_list_menu || "",
+    working_hour_operator: routes.working_hour_operator || "",
+    after_work_operator: routes.after_work_operator || "",
+    holiday_operator: routes.holiday_operator || ""
+  };
+
+  return await callEzvmsSoap("ModifyCompany", payload);
+}
+
 export async function modifyCompanyMenuFromNode(companyId, node) {
   const raw = node.ezvms || {};
 
@@ -155,6 +176,18 @@ export async function modifyCompanyMenuFromNode(companyId, node) {
   const defaultVal = node.dtmf?.["default"] || "";
   payload["default_action"] = defaultVal ? "5" : "0";
   payload["default_action_value"] = defaultVal;
+
+  // Call handling fallback routes (real ModifyCompanyMenu field names)
+  const fallback = node.fallback || {};
+  payload["ext_busy_menu"] = fallback.ext_busy_menu || "";
+  payload["ext_no_answer_menu"] = fallback.ext_no_answer_menu || "";
+  payload["ext_unavailable_menu"] = fallback.ext_unavailable_menu || "";
+  payload["operator_busy_menu"] = fallback.operator_busy_menu || "";
+  payload["retry_fail_action"] = fallback.retry_fail_action ? "5" : "0";
+  payload["retry_fail_action_value"] = fallback.retry_fail_action || "";
+  if (fallback.no_answer_timeout != null) {
+    payload["no_answer_timeout"] = fallback.no_answer_timeout;
+  }
 
   return await callEzvmsSoap("ModifyCompanyMenu", payload);
 }

@@ -1,27 +1,49 @@
 {
   "company": {
-    "companyId": "company.company_id",
-    "companyName": "company.name"
+    "company_id": "company.company_id",
+    "company_name": "company.name"
   },
 
   "entry_point": {
-    "pilotNumber": "entry_point.pilot_number",
-    "mainMenuId": "entry_point.start_node_id"
+    "pilot_number": "entry_point.pilot_number",
+    "start_node_id": "entry_point.start_node_id",
+    "working_hour_menu": "entry_point.routes.working_hour_menu",
+    "after_work_menu": "entry_point.routes.after_work_menu",
+    "holiday_menu": "entry_point.routes.holiday_menu",
+    "priority_menu": "entry_point.routes.priority_menu",
+    "black_list_menu": "entry_point.routes.black_list_menu",
+    "working_hour_operator": "entry_point.routes.working_hour_operator",
+    "after_work_operator": "entry_point.routes.after_work_operator",
+    "holiday_operator": "entry_point.routes.holiday_operator"
   },
 
   "nodes": {
-    "nodeId": "nodes[].id",
-    "nodeType": "nodes[].type",
-    "nodeName": "nodes[].label",
-    "promptFile": "nodes[].prompt",
-    "timeout": "nodes[].settings.timeout",
-    "retries": "nodes[].settings.retries"
+    "menu_id": "nodes[].id",
+    "menu_desc": "nodes[].label",
+    "main_prompt": "nodes[].prompt",
+    "noans_timeout": "nodes[].settings.timeout",
+    "retry_cnt": "nodes[].settings.retries",
+    "key0_value_..key9_value": "nodes[].dtmf['0'..'9']",
+    "key_star_action_value": "nodes[].dtmf['*']",
+    "key_hashtag_action_value": "nodes[].dtmf['#']",
+    "default_action_value": "nodes[].dtmf['default']",
+    "ext_busy_menu": "nodes[].fallback.ext_busy_menu",
+    "ext_no_answer_menu": "nodes[].fallback.ext_no_answer_menu",
+    "ext_unavailable_menu": "nodes[].fallback.ext_unavailable_menu",
+    "operator_busy_menu": "nodes[].fallback.operator_busy_menu",
+    "retry_fail_action_value": "nodes[].fallback.retry_fail_action",
+    "no_answer_timeout": "nodes[].fallback.no_answer_timeout"
   },
 
   "targets": {
-    "targetId": "targets[].id",
-    "targetNumber": "targets[].number",
-    "targetType": "targets[].type",
-    "targetLabel": "targets[].label"
-  }
+    "extension_or_menu_id": "targets[].id",
+    "proxy_tel_no": "targets[].number",
+    "_comment_targetType": "Not a literal EZVMS field; the app infers type (extension/voicemail/external_number/hangup) at mapping time from the destination ID shape.",
+    "_comment_targetLabel": "Not a literal EZVMS field; the app derives a display label, since EZVMS DTMF destinations are bare IDs with no associated display name."
+  },
+
+  "_notes": [
+    "All field names above come from EZVMS6800_SOAP_Provisioning_Interface_V2_0 (CreateCompanyMenu / ModifyCompanyMenu / GetCompany operations).",
+    "Previous versions of this file used camelCase placeholder names (companyId, pilotNumber, mainMenuId, nodeId, targetNumber, etc.) that do not exist in the real EZVMS SOAP interface. Those were unverified placeholders, not real field names."
+  ]
 }

@@ -1,18 +1,15 @@
 
 export function mapCompanyMenusToCallFlow(apiResponse, companyId, sipExtension) {
-  const companyInfo =
-    apiResponse.header?.[0]?.provisioning?.[0] || {};
-
-  const menus = apiResponse.companyMenus || [];
+  const menus = apiResponse?.companyMenus || [];
 
   return {
     company: {
       company_id: companyId,
-      name: apiResponse.header.user.name || `Company ${companyId}`
+      name: apiResponse?.header?.user?.name || `Company ${companyId}`
     },
 
     entry_point: {
-      pilot_number: apiResponse.header.provisioning.callerNum || null,
+      pilot_number: apiResponse?.header?.provisioning?.callerNum || null,
       start_node_id: menus[0]?.menu_id || null
     },
 

@@ -42,7 +42,7 @@ Frontend Graph UI
 /
 ├── backend/
 │   ├── package.json
-|   ├── .env
+│   ├── .env
 │   └── src/
 │       ├── api.json
 │       ├── ezvms/

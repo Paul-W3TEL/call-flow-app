@@ -91,6 +91,7 @@ Erreurs possibles :
 
 ```txt
 Permission denied
+
 Connection timed out
 Host unreachable
 ```
@@ -128,7 +129,7 @@ Press Ctrl+C to stop both processes.
 > call-flow-backend@0.1.0 dev
 > node src/server.js
 
-Call Flow API running on http://localhost:3000
+Call Flow API running on http://172.16.100.251:3000
 
   VITE v8.0.16  ready in 284 ms
 
